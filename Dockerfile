@@ -43,6 +43,7 @@ RUN buildDeps='curl gcc make autoconf libc-dev zlib1g-dev pkg-config' \
             libmemcached-dev \
             libmemcached11 \
             libmagickwand-dev \
+            cron \
             nginx=${NGINX_VERSION} \
             php8.2-fpm \
             php8.2-cli \
@@ -110,6 +111,9 @@ COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
 # Supervisor config
 COPY ./supervisord.conf /etc/supervisord.conf
+
+# Cron config
+RUN crontab -l | { cat; echo "* * * * * cd /usr/share/nginx/html && php artisan schedule:run >> /dev/null 2>&1"; } | crontab -
 
 # Override nginx's default config
 COPY ./default.conf /etc/nginx/conf.d/default.conf
