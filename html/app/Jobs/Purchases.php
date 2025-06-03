@@ -9,76 +9,84 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
+use RuntimeException;
+use Throwable;
 
 class Purchases implements ShouldQueue
 {
     use Queueable;
 
-    private array $data;
+    public function __construct(
+        private readonly array $data
+    ) {}
 
     /**
-     * Create a new job instance.
-     */
-    public function __construct($data)
-    {
-        $this->data = $data;
-    }
-
-    /**
-     * Execute the job.
+     * @throws Throwable
      */
     public function handle(HttpInterface $http): void
     {
-        $result = $http->get('purchases', $this->data);
+        try {
+            $result = $http->get('purchases', $this->data);
 
-        if (empty($result['error'])) {
-            $insert_db = $this->updateOrCreateToDB($result['data'], $this->data['query']['classifier']);
-            Log::info(
-                'count-api: ' . count($result['data'])
-                . '; count-insert-db: ' . count($insert_db)
-                . '; data-in: ' . json_encode($this->data)
-            );
-            $this->createPurchaseNumber($insert_db);
-            $this->createNextJob($result);
-        } else {
-            Log::error($result['error']);
+            if (!empty($result['error'])) {
+                throw new RuntimeException($result['error']);
+            }
+
+            if (empty($result['data'])) {
+                Log::info('No purchases data found for query: ' . json_encode($this->data));
+                return;
+            }
+
+            $insertedPurchases = $this->processPurchases($result['data'], $this->data['query']['classifier']);
+
+            $this->logSuccess($result['data'], $insertedPurchases);
+            $this->dispatchPurchaseNumberJobs($insertedPurchases);
+            $this->handleNextBatch($result);
+
+        } catch (Throwable $e) {
+            Log::error('Failed to process purchases: ' . $e->getMessage(), [
+                'data' => $this->data,
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw $e;
         }
     }
 
-    /**
-     * @param array $data
-     * @return array
-     */
-    private function updateOrCreateToDB(array $data, string $classifier): array
+    private function processPurchases(array $data, string $classifier): array
     {
-        foreach ($data as &$purchase) {
-            $purchase = (new PurchasesDTO($purchase, $classifier))->toArray();
+        $purchases = array_map(
+            fn($purchase) => PurchasesDTO::from($purchase, $classifier)->toArray(),
+            $data
+        );
+
+        return Purchase::updateOrCreate($purchases);
+/*        foreach ($data as &$purchase) {
+            $purchase = PurchasesDTO::from($purchase, $classifier)->toArray();
         }
-        return Purchase::updateOrCreate($data);
+        return Purchase::updateOrCreate($data);*/
     }
 
-    /**
-     * Создание задания получения данных закупки (в т.ч. uri файлов).
-     * @param array $purchase_numbers
-     * @return void
-     */
-    private function createPurchaseNumber(array $purchase_numbers): void
+    private function logSuccess(array $data, array $insertedPurchases): void
     {
-        foreach ($purchase_numbers as $purchase_number) {
-            PurchaseNumber::dispatch($purchase_number);
+        Log::info('Purchases processed successfully', [
+            'total_from_api' => count($data),
+            'total_inserted' => count($insertedPurchases),
+            'query_data' => $this->data
+        ]);
+    }
+
+    private function dispatchPurchaseNumberJobs(array $purchaseNumbers): void
+    {
+        foreach ($purchaseNumbers as $purchaseNumber) {
+            PurchaseNumber::dispatch($purchaseNumber);
         }
     }
 
-    /**
-     * Создание заданий для последующей выборки данных.
-     * @param array $result
-     * @return void
-     */
-    private function createNextJob(array $result): void
+    private function handleNextBatch(array $result): void
     {
         if ($paginator = Config::get('eisgov.gosplan_info.paginator') and count($result['data']) == $paginator) {
-            $this->data['query']['skip'] += $paginator;
-            Purchases::dispatch($this->data);
+            $data = $this->data['query']['skip'] + $paginator;
+            Purchases::dispatch($data);
         }
     }
 }
