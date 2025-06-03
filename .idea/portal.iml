@@ -58,7 +58,6 @@
       <excludeFolder url="file://$MODULE_DIR$/html/vendor/nikic/php-parser" />
       <excludeFolder url="file://$MODULE_DIR$/html/vendor/nunomaduro/collision" />
       <excludeFolder url="file://$MODULE_DIR$/html/vendor/nunomaduro/termwind" />
-      <excludeFolder url="file://$MODULE_DIR$/html/vendor/openspout/openspout" />
       <excludeFolder url="file://$MODULE_DIR$/html/vendor/phar-io/manifest" />
       <excludeFolder url="file://$MODULE_DIR$/html/vendor/phar-io/version" />
       <excludeFolder url="file://$MODULE_DIR$/html/vendor/phpoption/phpoption" />
@@ -80,7 +79,6 @@
       <excludeFolder url="file://$MODULE_DIR$/html/vendor/ralouphie/getallheaders" />
       <excludeFolder url="file://$MODULE_DIR$/html/vendor/ramsey/collection" />
       <excludeFolder url="file://$MODULE_DIR$/html/vendor/ramsey/uuid" />
-      <excludeFolder url="file://$MODULE_DIR$/html/vendor/rap2hpoutre/fast-excel" />
       <excludeFolder url="file://$MODULE_DIR$/html/vendor/sebastian/cli-parser" />
       <excludeFolder url="file://$MODULE_DIR$/html/vendor/sebastian/code-unit" />
       <excludeFolder url="file://$MODULE_DIR$/html/vendor/sebastian/code-unit-reverse-lookup" />
@@ -246,6 +244,10 @@
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/vlucas/phpdotenv" />
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/voku/portable-ascii" />
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/webmozart/assert" />
+      <excludeFolder url="file://$MODULE_DIR$/html/vendor/laravel/sanctum" />
+      <excludeFolder url="file://$MODULE_DIR$/html/vendor/lee-to/fast-attributes" />
+      <excludeFolder url="file://$MODULE_DIR$/html/vendor/nyholm/psr7" />
+      <excludeFolder url="file://$MODULE_DIR$/html/vendor/symfony/psr-http-message-bridge" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

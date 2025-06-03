@@ -130,8 +130,6 @@
       <path value="$PROJECT_DIR$/html/vendor/doctrine/lexer" />
       <path value="$PROJECT_DIR$/html/vendor/lee-to/laravel-package-command" />
       <path value="$PROJECT_DIR$/html/vendor/moonshine/moonshine" />
-      <path value="$PROJECT_DIR$/html/vendor/openspout/openspout" />
-      <path value="$PROJECT_DIR$/html/vendor/rap2hpoutre/fast-excel" />
       <path value="$PROJECT_DIR$/src/vendor/composer" />
       <path value="$PROJECT_DIR$/src/vendor/psr/event-dispatcher" />
       <path value="$PROJECT_DIR$/src/vendor/psr/http-client" />
@@ -247,6 +245,10 @@
       <path value="$PROJECT_DIR$/src/vendor/guzzlehttp/uri-template" />
       <path value="$PROJECT_DIR$/src/vendor/nunomaduro/collision" />
       <path value="$PROJECT_DIR$/src/vendor/nunomaduro/termwind" />
+      <path value="$PROJECT_DIR$/html/vendor/nyholm/psr7" />
+      <path value="$PROJECT_DIR$/html/vendor/symfony/psr-http-message-bridge" />
+      <path value="$PROJECT_DIR$/html/vendor/lee-to/fast-attributes" />
+      <path value="$PROJECT_DIR$/html/vendor/laravel/sanctum" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.2" />
