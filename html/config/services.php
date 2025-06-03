@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'search' => [
+        'url' => env('SEARCH_SERVICE_URL', 'http://search.local'),
+        'files_upload_endpoint' => '/api/files-upload',
+    ],
+
 ];
