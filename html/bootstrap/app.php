@@ -28,6 +28,6 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withSchedule(function (Schedule $schedule) {
-        $schedule->call(new ImportPurchases)->everyMinute();//everyTenMinutes();
+        $schedule->call(new ImportPurchases)->everyTenMinutes();
     })
     ->create();
