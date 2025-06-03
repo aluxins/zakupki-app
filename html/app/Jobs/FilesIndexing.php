@@ -2,39 +2,76 @@
 
 namespace App\Jobs;
 
+use App\Exceptions\Api\ApiResponseException;
+use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\Response;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class FilesIndexing implements ShouldQueue
 {
     use Queueable;
 
-    private array $files;
+    public function __construct(
+        private readonly array $files
+    ) {}
 
     /**
-     * Create a new job instance.
-     */
-    public function __construct(array $files)
-    {
-        $this->files = $files;
-    }
-
-    /**
-     * Execute the job.
+     * @throws Throwable
+     * @throws ConnectionException
      */
     public function handle(): void
     {
-        try {
-            $response = Http::withHeaders(['accept' => 'application/json'])
-                ->post('http://search.local/api/files-upload', $this->files);
-            Log::info(
-                'Файлы отправлены на индексацию: ' . count($response->json()) . ' шт.' .
-                ' purchase_number: ' . $this->files[0]['reg_number'] ?? ''
-            );
-        } catch (\Exception $e) {
-            Log::error('Сервис manticore-search недоступен: ' . $e->getMessage());
+        if (empty($this->files)) {
+            Log::info('No files to index');
+            return;
         }
+
+        try {
+            $response = $this->sendToSearchService();
+
+            $this->logSuccess($response->json());
+        } catch (ConnectionException $e) {
+            $this->logError('Search service request failed', $e);
+            throw new ApiResponseException('Search service request failed');
+        } catch (Throwable $e) {
+            $this->logError('Unexpected error during indexing', $e);
+            throw $e;
+        }
+    }
+
+    /**
+     * @throws ConnectionException
+     */
+    private function sendToSearchService(): PromiseInterface|Response
+    {
+        $baseUrl = Config::get('services.search.url');
+        $endpoint = Config::get('services.search.files_upload_endpoint');
+
+        return Http::withHeaders([
+            'accept' => 'application/json'
+        ])->post($baseUrl . $endpoint, $this->files);
+    }
+
+    private function logSuccess(array $responseData): void
+    {
+        Log::info('Files successfully sent for indexing', [
+            'indexed_count' => count($responseData),
+            'purchase_number' => $this->files[0]['reg_number'] ?? 'unknown'
+        ]);
+    }
+
+    private function logError(string $message, Throwable $exception): void
+    {
+        Log::error($message, [
+            'error' => $exception->getMessage(),
+            'purchase_number' => $this->files[0]['reg_number'] ?? 'unknown',
+            'trace' => $exception->getTraceAsString()
+        ]);
     }
 }
