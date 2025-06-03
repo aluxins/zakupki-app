@@ -244,6 +244,7 @@
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/vlucas/phpdotenv" />
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/voku/portable-ascii" />
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/webmozart/assert" />
+      <excludeFolder url="file://$MODULE_DIR$/html/public/vendor" />
       <excludeFolder url="file://$MODULE_DIR$/html/vendor/laravel/sanctum" />
       <excludeFolder url="file://$MODULE_DIR$/html/vendor/lee-to/fast-attributes" />
       <excludeFolder url="file://$MODULE_DIR$/html/vendor/nyholm/psr7" />
