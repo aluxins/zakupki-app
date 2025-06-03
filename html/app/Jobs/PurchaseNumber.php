@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Jobs;
 
 use App\Http\Services\EisGov\FilesDTO;
@@ -9,58 +11,84 @@ use App\Models\File;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
+use RuntimeException;
 use stdClass;
+use Throwable;
 
 class PurchaseNumber implements ShouldQueue
 {
     use Queueable;
 
-    private string $purchase_number;
+    public function __construct(
+        private readonly string $purchase_number
+    ) {}
 
     /**
-     * Create a new job instance.
-     */
-    public function __construct(string $purchase_number)
-    {
-        $this->purchase_number = $purchase_number;
-    }
-
-    /**
-     * Execute the job.
+     * @throws Throwable
      */
     public function handle(HttpInterface $http): void
     {
-        $result = $http->get('purchases/' . $this->purchase_number);
-        if (empty($result['error'])) {
-            $insert_count_db = $this->updateOrCreateToDB($result['data'], $this->purchase_number);
-            Log::info('Добавлено/обновлено файлов: ' . $insert_count_db . '; purchase_number: ' . $this->purchase_number);
-        } else {
-            Log::error($result['error']);
+        try {
+            $result = $http->get('purchases/' . $this->purchase_number);
+
+            if (!empty($result['error'])) {
+                throw new RuntimeException($result['error']);
+            }
+
+            if (empty($result['data'])) {
+                Log::info('No data found for purchase number: ' . $this->purchase_number);
+                return;
+            }
+
+            $insertCount = $this->processFiles($result['data']);
+
+            Log::info('Files processed successfully', [
+                'files_updated' => $insertCount,
+                'purchase_number' => $this->purchase_number
+            ]);
+
+        } catch (Throwable $e) {
+            Log::error('Failed to process purchase number: ' . $e->getMessage(), [
+                'purchase_number' => $this->purchase_number,
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw $e;
         }
     }
 
-    /**
-     * @param stdClass $data
-     * @param string $purchase_number
-     * @return int
-     */
-    private function updateOrCreateToDB(stdClass $data, string $purchase_number): int
+    private function processFiles(stdClass $data): int
     {
         $files = $data->docs[0]->source->attachmentsInfo->attachmentInfo ?? [];
-        foreach ($files as &$file) {
-            $file = (new FilesDTO($file, $purchase_number))->toArray();
+
+        if (empty($files)) {
+            return 0;
         }
-        if($count = File::updateOrCreate($files)){
-            $this->sendFilesForIndexing($files);
+
+        $processedFiles = array_map(
+            fn($file) => FilesDTO::from($file, $this->purchase_number)->toArray(),
+            $files
+        );
+
+        $insertCount = File::updateOrCreate($processedFiles);
+
+        if ($insertCount > 0) {
+            $this->prepareAndDispatchIndexing($processedFiles);
         }
-        return $count;
+
+        return $insertCount;
     }
 
-    private function sendFilesForIndexing($files): void
+    private function prepareAndDispatchIndexing(array $files): void
     {
-        foreach ($files as &$file) {
-            $file = (new IndexingDTO($file))->toArray();
+        $indexingData = array_map(function ($file) {
+            $dto = IndexingDTO::from($file);
+            return $dto ? $dto->toArray() : null;
+        }, $files);
+
+        $indexingData = array_filter($indexingData);
+
+        if (!empty($indexingData)) {
+            FilesIndexing::dispatch($indexingData);
         }
-        FilesIndexing::dispatch($files);
     }
 }
