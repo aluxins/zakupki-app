@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Laravel\Scout\Searchable;
+use RomanStruk\ManticoreScoutEngine\Mysql\Builder;
 use RuntimeException;
+use Throwable;
 
 /**
  * @property string $file_name
@@ -21,6 +25,8 @@ use RuntimeException;
  */
 class File extends Model
 {
+    use Searchable;
+
     protected $table = 'files';
 
     /**
@@ -70,7 +76,7 @@ class File extends Model
                 ]
             );
 
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             throw new RuntimeException(
                 "Failed to update or create files: {$e->getMessage()}",
                 0,
@@ -89,5 +95,13 @@ class File extends Model
             $item['created_at'] = $now;
             $item['updated_at'] = $now;
         }
+    }
+
+    public static function filesSearch($query): Collection
+    {
+        $documents = File::search($query,
+            fn(Builder $builder) => $builder->highlight()->select(['id', /*'content'*/])
+        );
+        return $documents->get();
     }
 }
