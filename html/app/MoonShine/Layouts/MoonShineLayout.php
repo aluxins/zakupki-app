@@ -32,6 +32,8 @@ use MoonShine\UI\Components\{Breadcrumbs,
     When};
 use App\MoonShine\Resources\UserResource;
 use MoonShine\MenuManager\MenuItem;
+use App\MoonShine\Resources\PurchaseResource;
+use App\MoonShine\Resources\FileResource;
 
 final class MoonShineLayout extends AppLayout
 {
@@ -45,8 +47,10 @@ final class MoonShineLayout extends AppLayout
     protected function menu(): array
     {
         return [
+            MenuItem::make('Закупки', PurchaseResource::class),
+            MenuItem::make('Файлы', FileResource::class),
+            MenuItem::make('Пользователи', UserResource::class),
             ...parent::menu(),
-            MenuItem::make('Users', UserResource::class),
         ];
     }
 
