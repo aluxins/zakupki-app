@@ -249,6 +249,12 @@
       <excludeFolder url="file://$MODULE_DIR$/html/vendor/lee-to/fast-attributes" />
       <excludeFolder url="file://$MODULE_DIR$/html/vendor/nyholm/psr7" />
       <excludeFolder url="file://$MODULE_DIR$/html/vendor/symfony/psr-http-message-bridge" />
+      <excludeFolder url="file://$MODULE_DIR$/html/vendor/laravel/scout" />
+      <excludeFolder url="file://$MODULE_DIR$/html/vendor/manticoresoftware/manticoresearch-php" />
+      <excludeFolder url="file://$MODULE_DIR$/html/vendor/php-http/discovery" />
+      <excludeFolder url="file://$MODULE_DIR$/html/vendor/romanstruk/manticore-scout-engine" />
+      <excludeFolder url="file://$MODULE_DIR$/html/vendor/barryvdh/laravel-debugbar" />
+      <excludeFolder url="file://$MODULE_DIR$/html/vendor/php-debugbar/php-debugbar" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

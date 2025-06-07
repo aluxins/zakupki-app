@@ -249,6 +249,12 @@
       <path value="$PROJECT_DIR$/html/vendor/symfony/psr-http-message-bridge" />
       <path value="$PROJECT_DIR$/html/vendor/lee-to/fast-attributes" />
       <path value="$PROJECT_DIR$/html/vendor/laravel/sanctum" />
+      <path value="$PROJECT_DIR$/html/vendor/manticoresoftware/manticoresearch-php" />
+      <path value="$PROJECT_DIR$/html/vendor/php-http/discovery" />
+      <path value="$PROJECT_DIR$/html/vendor/laravel/scout" />
+      <path value="$PROJECT_DIR$/html/vendor/romanstruk/manticore-scout-engine" />
+      <path value="$PROJECT_DIR$/html/vendor/php-debugbar/php-debugbar" />
+      <path value="$PROJECT_DIR$/html/vendor/barryvdh/laravel-debugbar" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.2" />
