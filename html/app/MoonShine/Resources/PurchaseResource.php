@@ -35,7 +35,7 @@ class PurchaseResource extends ModelResource
 
     protected string $title = 'Закупки';
 
-    protected bool $stickyTable = true;
+    //protected bool $stickyTable = true;
 
     protected bool $createInModal = true;
 
@@ -78,14 +78,14 @@ class PurchaseResource extends ModelResource
                         fn($value, Text $ctx) => 'ID:' . $ctx->getData()->getOriginal()->id . ' Номер: ' . $value
                     ),
 
-                    Date::make(__('moonshine::ui.resource.created_at'), 'published_at')
+                    Date::make('Дата публикации', 'published_at')
                         ->format("d.m.Y")
                         ->sortable(),
 
                     Url::make('purchase_number')
                         ->changePreview(
                             fn($value, Url $ctx) =>
-                                '<a target="_blank" href="https://zakupki.gov.ru/epz/order/notice/ea20/view/common-info.html?regNumber=' . $value . '">zakupki.gov.ru</a>'
+                                '( <a target="_blank" href="https://zakupki.gov.ru/epz/order/notice/ea20/view/common-info.html?regNumber=' . $value . '">zakupki.gov.ru &nearhk;</a> )'
                         ),
 
                     Text::make(__('object_info'), 'object_info'),
@@ -187,7 +187,7 @@ class PurchaseResource extends ModelResource
 
     protected function activeActions(): ListOf
     {
-        return parent::activeActions()
-            ->only(Action::VIEW);
+        return parent::activeActions()->empty();
+            //->only(Action::VIEW);
     }
 }
