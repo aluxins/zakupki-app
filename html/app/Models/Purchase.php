@@ -6,9 +6,11 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
+use Throwable;
 
 /**
  * @property string $purchase_number
@@ -63,12 +65,12 @@ class Purchase extends Model
 
         try {
             self::addTimestamps($data);
-            
+
             // Блокируем таблицу на запись для точного подсчета
             DB::statement('LOCK TABLES purchases WRITE');
-            
+
             $startCount = DB::table('purchases')->count();
-            
+
             DB::table('purchases')->upsert(
                 $data,
                 ['purchase_number'],
@@ -84,7 +86,7 @@ class Purchase extends Model
             );
 
             $insertedCount = DB::table('purchases')->count() - $startCount;
-            
+
             $newPurchases = [];
             if ($insertedCount > 0) {
                 $newPurchases = self::getLastInsertedPurchases($insertedCount);
@@ -92,13 +94,13 @@ class Purchase extends Model
 
             // Разблокируем таблицу
             DB::statement('UNLOCK TABLES');
-            
+
             return $newPurchases;
 
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // В случае ошибки обязательно разблокируем таблицу
             DB::statement('UNLOCK TABLES');
-            
+
             throw new RuntimeException(
                 "Failed to update or create purchases: {$e->getMessage()}",
                 0,
@@ -133,5 +135,10 @@ class Purchase extends Model
                 ->get()
                 ->toArray()
         );
+    }
+
+    public function files(): HasMany
+    {
+        return $this->hasMany(File::class, 'purchase_number', 'purchase_number');
     }
 }
