@@ -17,6 +17,21 @@ class FilesIndexing implements ShouldQueue
 {
     use Queueable;
 
+    /**
+     *
+     * @var int
+     */
+    public int $tries = 6;
+
+    /**
+     *
+     * @return array<int, int>
+     */
+    public function backoff(): array
+    {
+        return [60, 10*60, 60*60, 24*60*60];
+    }
+
     public function __construct(
         private readonly array $files
     ) {}
@@ -72,6 +87,18 @@ class FilesIndexing implements ShouldQueue
             'error' => $exception->getMessage(),
             'purchase_number' => $this->files[0]['reg_number'] ?? 'unknown',
             'trace' => $exception->getTraceAsString()
+        ]);
+    }
+
+    /**
+     * Job failure.
+     */
+    public function failed(?Throwable $e): void
+    {
+        Log::error('jobs/callback', [
+            'files' => json_encode($this->files),
+            'code' => $e->getCode(),
+            'message' => $e->getMessage()
         ]);
     }
 }
