@@ -18,6 +18,7 @@ use MoonShine\UI\Components\Layout\Box;
 use MoonShine\UI\Components\Layout\Column;
 use MoonShine\UI\Components\Layout\Grid;
 use MoonShine\UI\Components\Layout\LineBreak;
+use MoonShine\UI\Fields\Date;
 use MoonShine\UI\Fields\Email;
 use MoonShine\UI\Fields\ID;
 use MoonShine\UI\Fields\Password;
@@ -98,6 +99,39 @@ class UserResource extends ModelResource
         return [
             Text::make('E-mail', 'email')
                 ->onApply(fn(Builder $query, ?string $value) => $value === null ? $query : $query->whereLike('email', "%$value%")),
+        ];
+    }
+
+    protected function indexFields(): iterable
+    {
+        return [
+            ID::make()->sortable(),
+
+            Text::make(__('moonshine::ui.resource.name'), 'name'),
+
+
+            Date::make(__('moonshine::ui.resource.created_at'), 'created_at')
+                ->format("d.m.Y")
+                ->sortable(),
+
+            Email::make(__('moonshine::ui.resource.email'), 'email')
+                ->sortable(),
+        ];
+    }
+
+    protected function DetailPage(): iterable
+    {
+        return [
+
+            Text::make(__('moonshine::ui.resource.name'), 'name'),
+
+
+            Date::make(__('moonshine::ui.resource.created_at'), 'created_at')
+                ->format("d.m.Y")
+                ->sortable(),
+
+            Email::make(__('moonshine::ui.resource.email'), 'email')
+                ->sortable(),
         ];
     }
 }
