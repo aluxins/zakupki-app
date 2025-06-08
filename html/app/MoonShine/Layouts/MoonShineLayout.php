@@ -68,4 +68,20 @@ final class MoonShineLayout extends AppLayout
     {
         return parent::build();
     }
+
+    protected function getFooterCopyright(): string
+    {
+        return \sprintf(
+            <<<'HTML'
+                &copy; 2012-%d Апкау
+                <a href="https://apkau.ru/"
+                    class="font-semibold text-primary hover:text-secondary"
+                    target="_blank"
+                >
+                    apkau.ru
+                </a>
+                HTML,
+            now()->year,
+        );
+    }
 }
