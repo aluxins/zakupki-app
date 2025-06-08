@@ -60,4 +60,11 @@ return [
     */
 
     'auto_escape_search_phrase' => true,
+
+    'highlight_options' => [
+        'around' => 10,
+        'limit' => 1024,
+        'before_match' => '<i class="text-blue">',
+        'after_match' => '</i>'
+    ],
 ];
