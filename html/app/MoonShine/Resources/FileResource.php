@@ -10,9 +10,11 @@ use App\MoonShine\Pages\File\FileIndexPage;
 use App\MoonShine\Pages\File\FileFormPage;
 use App\MoonShine\Pages\File\FileDetailPage;
 
+use MoonShine\Laravel\Enums\Action;
 use MoonShine\Laravel\Fields\Relationships\RelationRepeater;
 use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\Laravel\Pages\Page;
+use MoonShine\Support\ListOf;
 use MoonShine\UI\Fields\Date;
 use MoonShine\UI\Fields\ID;
 use MoonShine\UI\Fields\Number;
@@ -27,6 +29,12 @@ class FileResource extends ModelResource
     protected string $model = File::class;
 
     protected string $title = 'Files';
+
+    protected bool $createInModal = true;
+
+    protected bool $editInModal = true;
+
+    protected bool $detailInModal = true;
 
     /**
      * @return list<Page>
@@ -59,7 +67,17 @@ class FileResource extends ModelResource
             Text::make(__('File name'), 'file_name'),
 
             Url::make(__('File url'), 'url'),
-            Text::make(__('Content'), 'content'),
+            Text::make('Номер закупки', 'purchase_number'),
         ];
+    }
+
+    protected function activeActions(): ListOf
+    {
+        return parent::activeActions()->only(Action::VIEW);
+    }
+
+    protected function search(): array
+    {
+        return ['purchase_number'];
     }
 }
