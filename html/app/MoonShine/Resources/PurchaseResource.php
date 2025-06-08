@@ -279,4 +279,10 @@ class PurchaseResource extends ModelResource
         return parent::activeActions()->empty();
             //->only(Action::VIEW);
     }
+
+
+    protected function search(): array
+    {
+        return ['purchase_number'];
+    }
 }
