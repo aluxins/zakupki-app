@@ -82,10 +82,16 @@ class Purchases implements ShouldQueue
         }
     }
 
+    /**
+     * Создает следующее задание (пагинация).
+     * @param array $result
+     * @return void
+     */
     private function handleNextBatch(array $result): void
     {
         if ($paginator = Config::get('eisgov.gosplan_info.paginator') and count($result['data']) == $paginator) {
-            $data = $this->data['query']['skip'] + $paginator;
+            $data = $this->data;
+            $data['query']['skip'] += $paginator;
             Purchases::dispatch($data);
         }
     }
