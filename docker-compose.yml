@@ -12,6 +12,14 @@ services:
       - ./html:/usr/share/nginx/html:delegated
     networks:
       purchases_network:
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.125'
+          memory: 128M
 
   mysql:
     image: mariadb:11
@@ -28,6 +36,14 @@ services:
       - ./data/mysql:/var/lib/mysql:delegated
     networks:
       purchases_network:
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.125'
+          memory: 128M
 
   redis:
     image: "redis:latest"
@@ -47,6 +63,14 @@ services:
       - ./data/redis:/data:delegated
     networks:
       purchases_network:
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.125'
+          memory: 128M
 
 networks:
   purchases_network:
