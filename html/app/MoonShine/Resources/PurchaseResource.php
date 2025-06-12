@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 use MoonShine\Laravel\Fields\Relationships\HasMany;
 use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\Laravel\Pages\Page;
+use MoonShine\Support\Enums\SortDirection;
 use MoonShine\Support\ListOf;
 use MoonShine\UI\Fields\Date;
 use MoonShine\UI\Fields\DateRange;
@@ -23,7 +24,7 @@ use MoonShine\UI\Fields\Range;
 use MoonShine\UI\Fields\Switcher;
 use MoonShine\UI\Fields\Text;
 use MoonShine\UI\Fields\Url;
-use RomanStruk\ManticoreScoutEngine\Mysql\Builder;
+use RomanStruk\ManticoreScoutEngine\Mysql\Builder as ManticoreBuilder;
 use Throwable;
 
 /**
@@ -44,6 +45,9 @@ class PurchaseResource extends ModelResource
     protected bool $editInModal = true;
 
     protected bool $detailInModal = true;
+
+    protected string $sortColumn = 'published_at';
+    protected SortDirection $sortDirection = SortDirection::DESC;
 
     /**
      * Возвращает список страниц ресурса
@@ -194,7 +198,7 @@ class PurchaseResource extends ModelResource
 
         $documents = File::search(
             $validatedData['filter']['files_search'],
-            function (Builder $builder) use ($validatedData) {
+            function (ManticoreBuilder $builder) use ($validatedData) {
                 $highlight_options = Config::array('manticore.highlight_options', []);
                 if (!empty($validatedData['filter']['strict_search'])) { // Включение строгого режима поиска.
                     $builder
