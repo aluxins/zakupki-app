@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim
+FROM debian:bullseye-backports
 
 LABEL maintainer="Colin Wilson colin@wyveo.com"
 
@@ -120,6 +120,7 @@ COPY ./default.conf /etc/nginx/conf.d/default.conf
 
 # Override default nginx welcome page
 COPY html /usr/share/nginx/html
+RUN chmod -R 0777 /usr/share/nginx/html/storage/
 
 # Copy Scripts
 COPY ./start.sh /start.sh
