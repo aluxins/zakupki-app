@@ -27,10 +27,14 @@ return new class extends Migration
             $table->string('purchase_type')->index();
             $table->string('classifier')->index();
             $table->text('object_info')->fulltext();
-            $table->decimal('max_price', total: 12, places: 2);
+            $table->decimal('max_price', total: 12, places: 2)->index();
             $table->integer('region')->index();
-            $table->dateTime('published_at', precision: 6);
+            $table->enum('type_fz', ['fz44', 'fz223']);
+            $table->dateTime('published_at', precision: 6)->index();
             $table->timestamps();
+
+            // Составной индекс для часто используемых комбинаций фильтров
+            $table->index(['max_price', 'type_fz', 'published_at']);
         });
         DB::statement('ALTER TABLE purchases ENGINE = MyISAM');
     }

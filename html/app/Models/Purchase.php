@@ -139,6 +139,6 @@ class Purchase extends Model
 
     public function files(): HasMany
     {
-        return $this->hasMany(File::class, 'purchase_number', 'purchase_number');
+        return $this->hasMany(File::class);
     }
 }

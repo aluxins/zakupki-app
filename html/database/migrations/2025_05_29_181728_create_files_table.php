@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Purchase;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +20,8 @@ return new class extends Migration
             $table->text('description');
             $table->text('url');
             $table->string('hash')->unique();
-            $table->string('purchase_number');
+            $table->string('purchase_number')->index('purchase_number');
+            $table->foreignIdFor(Purchase::class);
             $table->timestamps();
         });
         DB::statement('ALTER TABLE files ENGINE = MyISAM');

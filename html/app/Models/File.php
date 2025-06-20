@@ -72,6 +72,7 @@ class File extends Model
                     'description',
                     'url',
                     'purchase_number',
+                    'purchase_id',
                     'updated_at'
                 ]
             );

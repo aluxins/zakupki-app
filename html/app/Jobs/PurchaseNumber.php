@@ -8,6 +8,7 @@ use App\Http\Services\EisGov\FilesDTO;
 use App\Http\Services\EisGov\HttpInterface;
 use App\Http\Services\EisGov\IndexingDTO;
 use App\Models\File;
+use App\Models\Purchase;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Config;
@@ -68,7 +69,11 @@ class PurchaseNumber implements ShouldQueue
         }
 
         $processedFiles = array_map(
-            fn($file) => FilesDTO::from($file, $this->purchase_number)->toArray(),
+            fn($file) => FilesDTO::from(
+                $file,
+                $this->purchase_number,
+                Purchase::all()->where('purchase_number', '=', $this->purchase_number)->first()->id
+            )->toArray(),
             $files
         );
 

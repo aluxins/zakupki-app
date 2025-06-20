@@ -39,7 +39,7 @@ class Purchases implements ShouldQueue
                 return;
             }
 
-            $insertedPurchases = $this->processPurchases($result['data'], $this->data['query']['classifier']);
+            $insertedPurchases = $this->processPurchases($result['data'], $this->data['query']['classifier'], $this->typeFZ);
 
             $this->logSuccess($result['data'], $insertedPurchases);
             $this->dispatchPurchaseNumberJobs($insertedPurchases);
@@ -54,10 +54,10 @@ class Purchases implements ShouldQueue
         }
     }
 
-    private function processPurchases(array $data, string $classifier): array
+    private function processPurchases(array $data, string $classifier, string $typeFZ): array
     {
         $purchases = array_map(
-            fn($purchase) => PurchasesDTO::from($purchase, $classifier)->toArray(),
+            fn($purchase) => PurchasesDTO::from($purchase, $classifier, $typeFZ)->toArray(),
             $data
         );
 

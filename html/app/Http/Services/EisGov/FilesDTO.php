@@ -15,7 +15,8 @@ final readonly class FilesDTO
         private string $description,
         private string $url,
         private string $hash,
-        private string $purchase_number
+        private string $purchase_number,
+        private int $purchase_id
     ) {
         $this->validate();
     }
@@ -34,9 +35,12 @@ final readonly class FilesDTO
         if (empty($this->purchase_number)) {
             throw new FileValidationException('Purchase number cannot be empty');
         }
+        if (empty($this->purchase_id)) {
+            throw new FileValidationException('Purchase ID cannot be empty');
+        }
     }
 
-    public static function from(stdClass $data, string $purchase_number): self
+    public static function from(stdClass $data, string $purchase_number, int $purchase_id): self
     {
         return new self(
             file_name: $data->fileName,
@@ -44,7 +48,8 @@ final readonly class FilesDTO
             description: $data->docDescription,
             url: $data->url,
             hash: sha1($data->url),
-            purchase_number: $purchase_number
+            purchase_number: $purchase_number,
+            purchase_id: $purchase_id
         );
     }
 
@@ -57,6 +62,7 @@ final readonly class FilesDTO
             'url' => $this->url,
             'hash' => $this->hash,
             'purchase_number' => $this->purchase_number,
+            'purchase_id' => $this->purchase_id,
         ];
     }
 }
