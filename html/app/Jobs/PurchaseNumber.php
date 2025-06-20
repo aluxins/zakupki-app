@@ -10,6 +10,7 @@ use App\Http\Services\EisGov\IndexingDTO;
 use App\Models\File;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
 use stdClass;
@@ -20,7 +21,8 @@ class PurchaseNumber implements ShouldQueue
     use Queueable;
 
     public function __construct(
-        private readonly string $purchase_number
+        private readonly string $purchase_number,
+        private readonly string $typeFZ
     ) {}
 
     /**
@@ -29,6 +31,7 @@ class PurchaseNumber implements ShouldQueue
     public function handle(HttpInterface $http): void
     {
         try {
+            $http->setBaseUri(Config::get('eisgov.gosplan_info.base_uri_' . $this->typeFZ));
             $result = $http->get('purchases/' . $this->purchase_number);
 
             if (!empty($result['error'])) {

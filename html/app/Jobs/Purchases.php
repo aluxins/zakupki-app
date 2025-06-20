@@ -17,7 +17,8 @@ class Purchases implements ShouldQueue
     use Queueable;
 
     public function __construct(
-        private readonly array $data
+        private readonly array $data,
+        private readonly string $typeFZ
     ) {}
 
     /**
@@ -26,6 +27,7 @@ class Purchases implements ShouldQueue
     public function handle(HttpInterface $http): void
     {
         try {
+            $http->setBaseUri(Config::get('eisgov.gosplan_info.base_uri_' . $this->typeFZ));
             $result = $http->get('purchases', $this->data);
 
             if (!empty($result['error'])) {
@@ -78,7 +80,7 @@ class Purchases implements ShouldQueue
     private function dispatchPurchaseNumberJobs(array $purchaseNumbers): void
     {
         foreach ($purchaseNumbers as $purchaseNumber) {
-            PurchaseNumber::dispatch($purchaseNumber);
+            PurchaseNumber::dispatch($purchaseNumber, $this->typeFZ);
         }
     }
 
@@ -92,7 +94,7 @@ class Purchases implements ShouldQueue
         if ($paginator = Config::get('eisgov.gosplan_info.paginator') and count($result['data']) == $paginator) {
             $data = $this->data;
             $data['query']['skip'] += $paginator;
-            Purchases::dispatch($data);
+            Purchases::dispatch($data, $this->typeFZ);
         }
     }
 }

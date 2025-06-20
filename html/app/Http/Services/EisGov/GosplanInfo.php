@@ -13,26 +13,29 @@ use Throwable;
 class GosplanInfo implements HttpInterface
 {
     private Client $client;
+    private string $baseUri;
 
     public function __construct()
     {
-        $baseUri = Config::get('eisgov.gosplan_info.base_uri_fz44');
-
-        if (empty($baseUri)) {
-            throw new RuntimeException('Base URI for GosplanInfo service is not configured');
-        }
-
         $this->client = new Client([
-            'base_uri' => $baseUri,
+            //'base_uri' => $this->baseUri,
             'timeout' => 30,
             'connect_timeout' => 15
         ]);
     }
 
+    public function setBaseUri(string $uri): void
+    {
+        if (empty($uri)) {
+            throw new RuntimeException('Base URI for GosplanInfo service is not configured');
+        }
+        $this->baseUri = $uri;
+    }
+
     public function get(string $uri, array $options = []): array
     {
         try {
-            $response = $this->client->request('GET', $uri, $options);
+            $response = $this->client->request('GET', $this->baseUri . $uri, $options);
             $contents = $response->getBody()->getContents();
 
             $data = json_decode($contents, false);
@@ -61,7 +64,7 @@ class GosplanInfo implements HttpInterface
     public function post(string $uri, array $options = []): array
     {
         try {
-            $response = $this->client->request('POST', $uri, $options);
+            $response = $this->client->request('POST', $this->baseUri . $uri, $options);
             $contents = $response->getBody()->getContents();
 
             $data = json_decode($contents, false);

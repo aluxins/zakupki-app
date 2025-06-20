@@ -28,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withSchedule(function (Schedule $schedule) {
-        $schedule->call(new ImportPurchases)->everyTenMinutes();
+        $schedule->call(new ImportPurchases('fz223'))->hourlyAt([5, 15, 25, 35, 45, 55]);
+        $schedule->call(new ImportPurchases('fz44'))->hourlyAt([0, 10, 20, 30, 40, 50]);
     })
     ->create();
