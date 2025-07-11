@@ -27,9 +27,9 @@ final readonly class PurchasesDTO
         if (empty($this->purchase_number)) {
             throw new PurchaseValidationException('Purchase number cannot be empty');
         }
-        if (empty($this->purchase_type)) {
-            throw new PurchaseValidationException('Purchase type cannot be empty');
-        }
+//        if (empty($this->purchase_type)) {
+//            throw new PurchaseValidationException('Purchase type cannot be empty');
+//        }
         if ($this->max_price < 0) {
             throw new PurchaseValidationException('Max price cannot be negative');
         }
