@@ -13,28 +13,21 @@ use Throwable;
 
 final class ImportPurchases
 {
-    private const DEFAULT_DAYS_LOOKBACK = 3;
-    private const DEFAULT_CLASSIFIER = '32.30';
-    /*private const DEFAULT_PURCHASE_TYPE_FZ44 = 'epNotificationEF2020';
-    private const DEFAULT_PURCHASE_TYPE_FZ223 = 'epNotificationEF2020';*/
-    private const DEFAULT_STAGE = 1;
-    private const DEFAULT_SORT = 'updated_at_asc';
-
     public function __invoke(): void
     {
-        try {
-            $this->validateConfig();
-
-            $data = $this->prepareQueryData();
-
-            Purchases::dispatch($data, $this->typeFZ);
-
-            $this->logSuccess($data);
-        } catch (Throwable $e) {
-            Log::error('Failed to initiate purchase import ' . $this->typeFZ, [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
+        $this->validateConfig();
+        foreach ($this->prepareClassifier() as $classifier) {
+            try {
+                $data = $this->prepareQueryData();
+                $data['query']['classifier'] = $classifier;
+                Purchases::dispatch($data, $this->typeFZ);
+                $this->logSuccess($data);
+            } catch (Throwable $e) {
+                Log::error('Failed to initiate purchase import ' . $this->typeFZ, [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+            }
         }
     }
 
@@ -44,34 +37,30 @@ final class ImportPurchases
 
     private function validateConfig(): void
     {
-        if (!Config::has('eisgov.gosplan_info.paginator')) {
-            throw new RuntimeException('Paginator configuration is missing');
+        foreach (['paginator', 'sort', 'days_lookback', 'stage', 'classifiers'] as $param) {
+            if (!Config::has("eisgov.gosplan_info.$param")) {
+                throw new RuntimeException("$param configuration is missing");
+            }
         }
     }
 
     private function prepareQueryData(): array
     {
-        $daysLookback = Config::get('eisgov.gosplan_info.days_lookback', self::DEFAULT_DAYS_LOOKBACK);
-        $classifier = Config::get('eisgov.gosplan_info.classifier', self::DEFAULT_CLASSIFIER);
-        $stage = Config::get('eisgov.gosplan_info.stage', self::DEFAULT_STAGE);
-        $sort = Config::get('eisgov.gosplan_info.sort', self::DEFAULT_SORT);
-        $paginator = Config::get('eisgov.gosplan_info.paginator');
-        /*$purchaseType = $this->typeFZ == 'fz44'
-            ? Config::get('eisgov.gosplan_info.purchase_type_fz44', self::DEFAULT_PURCHASE_TYPE_FZ44)
-            : Config::get('eisgov.imgosplan_infoport.purchase_type_fz223', self::DEFAULT_PURCHASE_TYPE_FZ223);*/
-
-
+        $daysLookback = (int) Config::get('eisgov.gosplan_info.days_lookback');
         return [
             'query' => [
-                'classifier' => $classifier,
-                'limit' => $paginator,
+                'limit' => Config::get('eisgov.gosplan_info.paginator', 10),
                 'published_after' => $this->calculatePublishedAfter($daysLookback),
-                //'purchase_type' => $purchaseType,
-                'stage' => $stage,
+                'stage' => Config::get('eisgov.gosplan_info.stage'),
                 'skip' => 0,
-                'sort' => $sort,
+                'sort' => Config::get('eisgov.gosplan_info.sort'),
             ]
         ];
+    }
+
+    private function prepareClassifier(): array
+    {
+        return preg_split("/[\s,]+/", Config::get('eisgov.gosplan_info.classifiers'));
     }
 
     private function calculatePublishedAfter(int $daysLookback): string
