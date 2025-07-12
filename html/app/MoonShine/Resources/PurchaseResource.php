@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\MoonShine\Resources;
 
+use App\Helpers\CodesSubjects;
 use App\Models\File;
 use App\Models\Purchase;
 use App\MoonShine\Pages\Purchase\PurchaseDetailPage;
@@ -90,7 +91,7 @@ class PurchaseResource extends ModelResource
             Date::make('Создано', 'published_at')->format('d.m.Y')
                 ->sortable()->customWrapperAttributes(['style' => 'vertical-align:top']),
 
-            Text::make(__('Регион'), 'region')
+            Text::make(__('Регион'), 'region', fn($item) => (new CodesSubjects)((int) $item->region))
                 ->sortable()->customWrapperAttributes(['style' => 'vertical-align:top']),
 
             //HasMany::make('files', 'files', FileResource::class)->disableOutside(),
