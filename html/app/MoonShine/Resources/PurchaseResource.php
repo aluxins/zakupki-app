@@ -22,6 +22,7 @@ use MoonShine\UI\Fields\Fieldset;
 use MoonShine\UI\Fields\Json;
 use MoonShine\UI\Fields\Number;
 use MoonShine\UI\Fields\Range;
+use MoonShine\UI\Fields\Select;
 use MoonShine\UI\Fields\Switcher;
 use MoonShine\UI\Fields\Text;
 use MoonShine\UI\Fields\Url;
@@ -91,7 +92,7 @@ class PurchaseResource extends ModelResource
             Date::make('Создано', 'published_at')->format('d.m.Y')
                 ->sortable()->customWrapperAttributes(['style' => 'vertical-align:top']),
 
-            Text::make(__('Регион'), 'region', fn($item) => (new CodesSubjects)((int) $item->region))
+            Text::make(__('Регион'), 'region', fn($item) => CodesSubjects::get()->one((int) $item->region))
                 ->sortable()->customWrapperAttributes(['style' => 'vertical-align:top']),
 
             //HasMany::make('files', 'files', FileResource::class)->disableOutside(),
@@ -270,7 +271,10 @@ class PurchaseResource extends ModelResource
     {
         return [
             Range::make('Начальная цена', 'max_price')->max(100000000),
-            Text::make('Регион', 'region'),
+            Select::make('Регион', 'region')
+                ->nullable()
+                ->options(CodesSubjects::get()->sortNumber()->withNumber()->all())
+                ->multiple(),
             DateRange::make('Дата публикации', 'published_at'),
             Text::make('Поиск по файлам', 'files_search')->canApply(fn() => false),
             Switcher::make('Строгий поиск', 'strict_search')->canApply(fn() => false)
