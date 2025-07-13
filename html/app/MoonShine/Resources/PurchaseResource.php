@@ -120,7 +120,7 @@ class PurchaseResource extends ModelResource
             Text::make('purchase_number')
                 ->changePreview(fn($value, Text $ctx) =>
                     //'ID:' . $ctx->getData()->getOriginal()->id .
-                    ' Номер: ' . $value . ' ' .
+                    ' Номер: ' . $value . ' <a href="?search='.$ctx->getData()->getOriginal()->purchase_number.'">&#128269;</a> ' .
                     ($ctx->getData()->getOriginal()->type_fz == 'fz44' ? '44-ФЗ' : '233-ФЗ')
                 ),
 
