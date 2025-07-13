@@ -26,7 +26,7 @@ final readonly class FilesDTO
         if (empty($this->file_name)) {
             throw new FileValidationException('File name cannot be empty');
         }
-        if ($this->file_size <= 0) {
+        if ($this->file_size < 0) {
             throw new FileValidationException('File size must be positive');
         }
         if (empty($this->url)) {
@@ -44,8 +44,8 @@ final readonly class FilesDTO
     {
         return new self(
             file_name: $data->fileName,
-            file_size: (int) $data->fileSize,
-            description: $data->docDescription,
+            file_size: (int) ($data->fileSize ?? 0),
+            description: $data->docDescription ?? $data->description,
             url: $data->url,
             hash: sha1($data->url),
             purchase_number: $purchase_number,

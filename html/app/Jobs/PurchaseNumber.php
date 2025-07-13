@@ -62,10 +62,20 @@ class PurchaseNumber implements ShouldQueue
 
     private function processFiles(stdClass $data): int
     {
-        $files = $data->docs[0]->source->attachmentsInfo->attachmentInfo ?? [];
+        if ($this->typeFZ == 'fz223') {
+            $files = $data->docs[0]->source->attachments->document ?? [];
+        }
+        if ($this->typeFZ == 'fz44') {
+            $files = $data->docs[0]->source->attachmentsInfo->attachmentInfo ?? [];
+        }
 
         if (empty($files)) {
             return 0;
+        }
+
+        // Если приходит не массив, а одиночный объект - оборачиваем в массив.
+        if ($files instanceof stdClass) {
+            $files = [$files];
         }
 
         $processedFiles = array_map(
