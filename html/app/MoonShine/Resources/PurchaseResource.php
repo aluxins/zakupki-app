@@ -16,6 +16,7 @@ use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\Laravel\Pages\Page;
 use MoonShine\Support\Enums\SortDirection;
 use MoonShine\Support\ListOf;
+use MoonShine\UI\Components\Layout\LineBreak;
 use MoonShine\UI\Fields\Date;
 use MoonShine\UI\Fields\DateRange;
 use MoonShine\UI\Fields\Fieldset;
@@ -118,7 +119,9 @@ class PurchaseResource extends ModelResource
         return Fieldset::make('Закупка', [
             Text::make('purchase_number')
                 ->changePreview(fn($value, Text $ctx) =>
-                    'ID:' . $ctx->getData()->getOriginal()->id . ' Номер: ' . $value
+                    //'ID:' . $ctx->getData()->getOriginal()->id .
+                    ' Номер: ' . $value . ' ' .
+                    ($ctx->getData()->getOriginal()->type_fz == 'fz44' ? '44-ФЗ' : '233-ФЗ')
                 ),
 
             Date::make('Дата публикации', 'published_at')
@@ -126,7 +129,8 @@ class PurchaseResource extends ModelResource
                 ->sortable(),
 
             $this->createPurchaseUrlField(),
-            Text::make(__('object_info'), 'object_info'),
+            LineBreak::make(),
+            Text::make(__('object_info'), 'object_info')->changePreview(fn($value, Text $ctx) => $ctx->getData()->getOriginal()->object_info),
             $this->createFilesField(),
         ]);
     }
@@ -137,12 +141,12 @@ class PurchaseResource extends ModelResource
     private function createPurchaseUrlField(): Url
     {
         return Url::make('purchase_number')
-            ->changePreview(fn($value) =>
-                sprintf(
-                    '( <a target="_blank" href="https://zakupki.gov.ru/epz/order/notice/ea20/view/common-info.html?regNumber=%s">zakupki.gov.ru &nearhk;</a> )',
-                    $value
-                )
-            );
+            ->changePreview(fn($value, Url $ctx) => sprintf(
+                '( <a target="_blank" href="https://zakupki.gov.ru/epz/order/notice/'
+                    . ($ctx->getData()->getOriginal()->type_fz == 'fz44' ? 'ea20/view' : 'notice223')
+                    . '/common-info.html?regNumber=%s">zakupki.gov.ru &nearhk;</a> )',
+                $value
+            ));
     }
 
     /**
