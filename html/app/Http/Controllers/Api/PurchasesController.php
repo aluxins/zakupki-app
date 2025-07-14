@@ -6,13 +6,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
+use App\Http\Services\EisGov\IndexingDTO;
+use App\Jobs\FilesIndexing;
+use App\Models\File;
 use App\Models\Purchase;
-use GuzzleHttp\Exception\ConnectException;
-use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -115,6 +114,30 @@ class PurchasesController extends Controller
 
             return ApiResponse::error(
                 message: 'Failed to retrieve purchase',
+                errors: $e->getMessage(),
+                code: 500
+            );
+        }
+    }
+
+    public function reIndexed(string $hash): JsonResponse
+    {
+        try {
+        $file = File::all()->where('hash', $hash)->first()->toArray();
+        $dto = IndexingDTO::from($file);
+        FilesIndexing::dispatch([$dto->toArray()]);
+        return ApiResponse::success(
+            data: $file,
+            message: 'Re-indexed successfully'
+        );
+        } catch (Throwable $e) {
+            Log::error('Failed to Re-indexed file', [
+                'hash' => $hash,
+                'error' => $e->getMessage()
+            ]);
+
+            return ApiResponse::error(
+                message: 'Failed to Re-indexed file',
                 errors: $e->getMessage(),
                 code: 500
             );

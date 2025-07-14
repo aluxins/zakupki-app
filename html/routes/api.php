@@ -21,4 +21,6 @@ Route::prefix('test')->group(function () {
 Route::prefix('purchases')->group(function () {
     Route::get('/', [PurchasesController::class, 'index']);
     Route::get('/{purchaseNumber}', [PurchasesController::class, 'show']);
+    Route::get('/reIndexed/{hash}', [PurchasesController::class, 'reIndexed'])->where('hash', '[A-Za-z0-9]+')
+        ->name('reIndexed');
 });
