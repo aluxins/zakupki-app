@@ -41,6 +41,11 @@ class Dashboard extends Page
     protected function components(): iterable
     {
         $days = 30;
+        $days_array = [];
+        for($i = $days;$i >= 0;$i--){
+            $days_array[Carbon::now()->subDays($i)->toDateString()] = 0;
+        }
+
         return [
             Box::make([
                 Title::make('Закупки'),
@@ -84,24 +89,24 @@ class Dashboard extends Page
 
                 LineChartMetric::make('Закупки за последние ' . $days . ' дней')
                     ->line([
-                        '44-ФЗ' => Purchase::query()
+                        '44-ФЗ' => array_merge($days_array, Purchase::query()
                             ->selectRaw('COUNT(*) as count, DATE_FORMAT(created_at, "%Y-%m-%d") as date')
                             ->where('created_at', '>=', Carbon::now()->subDays($days)->toDateString())
                             ->where('type_fz', 'fz44')
                             ->groupBy(['date'])
                             ->orderBy('date')
                             ->pluck('count', 'date')
-                            ->toArray(),
+                            ->toArray()),
                     ])
                     ->line([
-                        '223-ФЗ' => Purchase::query()
+                        '223-ФЗ' => array_merge($days_array, Purchase::query()
                             ->selectRaw('COUNT(*) as count, DATE_FORMAT(created_at, "%Y-%m-%d") as date')
                             ->where('created_at', '>=', Carbon::now()->subDays($days)->toDateString())
                             ->where('type_fz', 'fz223')
                             ->groupBy(['date'])
                             ->orderBy('date')
                             ->pluck('count', 'date')
-                            ->toArray(),
+                            ->toArray()),
                     ], '#78439E', 'line'),
 
             ]),
