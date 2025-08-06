@@ -17,7 +17,8 @@
         "manticoresoftware/manticoresearch-php": "^3.0",
         "moonshine/apexcharts": "^1.0",
         "moonshine/moonshine": "^3.13.6",
-        "romanstruk/manticore-scout-engine": "^7.0"
+        "romanstruk/manticore-scout-engine": "^7.0",
+        "symfony/dom-crawler": "^7.3"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.15",

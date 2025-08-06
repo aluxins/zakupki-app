@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Services\Schedules\ImportPurchases;
+use App\Http\Services\Schedules\ImportPurchasesGovRu;
 use App\Providers\AppServiceProvider;
 use App\Providers\RouteServiceProvider;
 use App\Providers\MoonShineServiceProvider;
@@ -28,7 +29,8 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withSchedule(function (Schedule $schedule) {
-        $schedule->call(new ImportPurchases('fz223'))->hourlyAt([5, 15, 25, 35, 45, 55]);
-        $schedule->call(new ImportPurchases('fz44'))->hourlyAt([0, 10, 20, 30, 40, 50]);
+        $schedule->call(new ImportPurchases('fz223'))  ->hourlyAt([ 0, 15, 30, 45]);
+        $schedule->call(new ImportPurchases('fz44'))   ->hourlyAt([ 5, 20, 35, 50]);
+        $schedule->call(new ImportPurchasesGovRu())           ->hourlyAt([10, 25, 40, 55]);
     })
     ->create();

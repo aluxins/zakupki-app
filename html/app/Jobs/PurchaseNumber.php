@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
+use \App\Http\Services\EisGov\GosplanInfo;
+use \App\Http\Services\EisGov\GovRuParser;
 use App\Http\Services\EisGov\FilesDTO;
 use App\Http\Services\EisGov\HttpInterface;
 use App\Http\Services\EisGov\IndexingDTO;
@@ -11,7 +13,6 @@ use App\Models\File;
 use App\Models\Purchase;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
 use stdClass;
@@ -23,16 +24,21 @@ class PurchaseNumber implements ShouldQueue
 
     public function __construct(
         private readonly string $purchase_number,
-        private readonly string $typeFZ
+        private readonly string $typeFZ,
+        private readonly string $http,
+        private readonly ?string $url,
     ) {}
 
     /**
      * @throws Throwable
      */
-    public function handle(HttpInterface $http): void
+    public function handle(): void
     {
         try {
-            $http->setBaseUri(Config::get('eisgov.gosplan_info.base_uri_' . $this->typeFZ));
+            $http = new $this->http([
+                'typeFZ' => $this->typeFZ,
+                'url' => $this->url
+            ]);
             $result = $http->get('purchases/' . $this->purchase_number);
 
             if (!empty($result['error'])) {
@@ -60,13 +66,15 @@ class PurchaseNumber implements ShouldQueue
         }
     }
 
-    private function processFiles(stdClass $data): int
+    private function processFiles(mixed $files): int
     {
-        if ($this->typeFZ == 'fz223') {
-            $files = $data->docs[0]->source->attachments->document ?? [];
-        }
-        if ($this->typeFZ == 'fz44') {
-            $files = $data->docs[0]->source->attachmentsInfo->attachmentInfo ?? [];
+        if($this->http !== 'GovRuParser'){
+            if ($this->typeFZ == 'fz223') {
+                $files = $files->docs[0]->source->attachments->document ?? [];
+            }
+            if ($this->typeFZ == 'fz44') {
+                $files = $files->docs[0]->source->attachmentsInfo->attachmentInfo ?? [];
+            }
         }
 
         if (empty($files)) {
@@ -86,7 +94,6 @@ class PurchaseNumber implements ShouldQueue
             )->toArray(),
             $files
         );
-
         $insertCount = File::updateOrCreate($processedFiles);
 
         if ($insertCount > 0) {

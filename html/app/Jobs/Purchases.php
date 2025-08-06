@@ -3,6 +3,8 @@
 namespace App\Jobs;
 
 use App\Http\Services\EisGov\HttpInterface;
+use \App\Http\Services\EisGov\GosplanInfo;
+use \App\Http\Services\EisGov\GovRuParser;
 use App\Http\Services\EisGov\PurchasesDTO;
 use App\Models\Purchase;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -18,31 +20,31 @@ class Purchases implements ShouldQueue
 
     public function __construct(
         private readonly array $data,
-        private readonly string $typeFZ
+        private readonly string $typeFZ,
+        private readonly string $http
     ) {}
 
     /**
      * @throws Throwable
      */
-    public function handle(HttpInterface $http): void
+    public function handle(): void
     {
         try {
-            $http->setBaseUri(Config::get('eisgov.gosplan_info.base_uri_' . $this->typeFZ));
+            $http = new $this->http(['typeFZ' => $this->typeFZ]);
             $result = $http->get('purchases', $this->data);
 
             if (!empty($result['error'])) {
                 throw new RuntimeException($result['error']);
             }
-
             if (empty($result['data'])) {
                 Log::info('No purchases data found for query: ' . json_encode($this->data));
                 return;
             }
 
             $insertedPurchases = $this->processPurchases($result['data'], $this->data['query']['classifier'], $this->typeFZ);
-
             $this->logSuccess($result['data'], $insertedPurchases);
-            $this->dispatchPurchaseNumberJobs($insertedPurchases);
+            $this->dispatchPurchaseOrganization($result['data'], $insertedPurchases);
+            $this->dispatchPurchaseNumberJobs($result['data'], $insertedPurchases);
             $this->handleNextBatch($result);
 
         } catch (Throwable $e) {
@@ -77,10 +79,25 @@ class Purchases implements ShouldQueue
         ]);
     }
 
-    private function dispatchPurchaseNumberJobs(array $purchaseNumbers): void
+    private function dispatchPurchaseNumberJobs(array $data, array $purchaseNumbers): void
     {
+        $typeFZ = '';
+        if(empty($this->typeFZ)){
+            $mapped = [];
+            foreach ($data as $purchase) {
+                $mapped[$purchase->purchase_number] = [$purchase->type_fz, $purchase->url];
+            }
+        }
         foreach ($purchaseNumbers as $purchaseNumber) {
-            PurchaseNumber::dispatch($purchaseNumber, $this->typeFZ);
+            if(empty($this->typeFZ)){
+                if(empty($mapped[$purchaseNumber][0])){
+                    Log::info('Not found type_fz for purchase: ' . $purchaseNumber);
+                    return;
+                }
+                $typeFZ = $mapped[$purchaseNumber][0];
+                $url = $mapped[$purchaseNumber][1];
+            }
+            PurchaseNumber::dispatch($purchaseNumber, $this->typeFZ ?: $typeFZ, $this->http, $url ?? null);
         }
     }
 
@@ -91,10 +108,27 @@ class Purchases implements ShouldQueue
      */
     private function handleNextBatch(array $result): void
     {
+        if(!isset($data['query']['skip'])){
+            return;
+        }
         if ($paginator = Config::get('eisgov.gosplan_info.paginator') and count($result['data']) == $paginator) {
             $data = $this->data;
             $data['query']['skip'] += $paginator;
             Purchases::dispatch($data, $this->typeFZ);
+        }
+    }
+
+    // Задание для определения региона заказчика закупки.
+    private function dispatchPurchaseOrganization(array $data, array $purchaseNumbers): void
+    {
+        $mapped = [];
+        foreach ($data as $purchase) {
+            $mapped[$purchase->purchase_number] = [$purchase->region, $purchase->registry_url ?? null];
+        }
+        foreach ($purchaseNumbers as $purchaseNumber) {
+            if(empty($mapped[$purchaseNumber][0])){
+                PurchaseOrganization::dispatch($purchaseNumber, $mapped[$purchaseNumber][1], $this->http);
+            }
         }
     }
 }

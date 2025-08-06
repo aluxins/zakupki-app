@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Services\Schedules;
 
+use App\Http\Services\EisGov\GosplanInfo;
 use App\Jobs\Purchases;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Config;
@@ -20,7 +21,7 @@ final class ImportPurchases
             try {
                 $data = $this->prepareQueryData();
                 $data['query']['classifier'] = $classifier;
-                Purchases::dispatch($data, $this->typeFZ);
+                Purchases::dispatch($data, $this->typeFZ, GosplanInfo::class);
                 $this->logSuccess($data);
             } catch (Throwable $e) {
                 Log::error('Failed to initiate purchase import ' . $this->typeFZ, [

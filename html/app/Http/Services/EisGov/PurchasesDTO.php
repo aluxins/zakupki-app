@@ -17,7 +17,9 @@ final readonly class PurchasesDTO
         private int $region,
         private string $type_fz,
         private string $published_at,
-        private string $classifier
+        private string $classifier,
+        private string $url,
+        private string $registry_url
     ) {
         $this->validate();
     }
@@ -37,6 +39,12 @@ final readonly class PurchasesDTO
 
     public static function from(stdClass $data, string $classifier, string $type_fz): self
     {
+        if(isset($data->type_fz) and $data->type_fz == '44-ФЗ'){
+            $type_fz = 'fz44';
+        }
+        if(isset($data->type_fz) and $data->type_fz == '223-ФЗ'){
+            $type_fz = 'fz223';
+        }
         return new self(
             purchase_number: (string) ($data->purchase_number ?? ''),
             purchase_type: (string) ($data->purchase_type ?? ''),
@@ -45,7 +53,9 @@ final readonly class PurchasesDTO
             region: (int) ($data->region ?? 0),
             type_fz: $type_fz,
             published_at: (string) ($data->published_at ?? ''),
-            classifier: $classifier
+            classifier: $classifier,
+            url: (string) ($data->url ?? ''),
+            registry_url: (string) ($data->registry_url ?? ''),
         );
     }
 
@@ -60,6 +70,7 @@ final readonly class PurchasesDTO
             'type_fz' => $this->type_fz,
             'published_at' => $this->published_at,
             'classifier' => $this->classifier,
+            //'url' => $this->url,
         ];
     }
 }

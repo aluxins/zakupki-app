@@ -14,26 +14,35 @@ class GosplanInfo implements HttpInterface
 {
     private Client $client;
     private string $baseUri;
+    private array $params;
 
-    public function __construct()
+    public function __construct(array $params = [])
     {
+        $this->params = $params;
         $this->client = new Client([
             //'base_uri' => $this->baseUri,
             'timeout' => 30,
             'connect_timeout' => 15
         ]);
+        $this->baseUri = '';
     }
 
-    public function setBaseUri(string $uri): void
+    public function setBaseUri(): void
     {
-        if (empty($uri)) {
-            throw new RuntimeException('Base URI for GosplanInfo service is not configured');
+        if (empty($this->params['typeFZ'])) {
+            throw new RuntimeException('TypeFZ for Gosplan.info service is not configured');
         }
-        $this->baseUri = $uri;
+        if (str_contains($this->params['typeFZ'], '44')) {
+            $this->baseUri = Config::get('eisgov.gosplan_info.base_uri_fz44');
+        }
+        if (str_contains($this->params['typeFZ'], '223')) {
+            $this->baseUri = Config::get('eisgov.gosplan_info.base_uri_fz223');
+        }
     }
 
     public function get(string $uri, array $options = []): array
     {
+        $this->setBaseUri();
         try {
             $response = $this->client->request('GET', $this->baseUri . $uri, $options);
             $contents = $response->getBody()->getContents();
@@ -63,6 +72,7 @@ class GosplanInfo implements HttpInterface
 
     public function post(string $uri, array $options = []): array
     {
+        $this->setBaseUri();
         try {
             $response = $this->client->request('POST', $this->baseUri . $uri, $options);
             $contents = $response->getBody()->getContents();
