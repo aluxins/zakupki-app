@@ -6,7 +6,10 @@ namespace App\MoonShine\Pages;
 
 use App\Models\File;
 use App\Models\Purchase;
+use Exception;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use MoonShine\Apexcharts\Components\LineChartMetric;
 use MoonShine\Laravel\Pages\Page;
 use MoonShine\Contracts\UI\ComponentContract;
@@ -165,6 +168,48 @@ class Dashboard extends Page
                     ], '#78839E', 'line'),
 
             ]),
+
+            LineBreak::make(),
+
+                Box::make([
+                    Title::make('Обновления ПО'),
+                    Grid::make([
+                        Column::make(
+                            [
+                                ValueMetric::make('[' .
+                                    Carbon::createFromTimestampUTC($this->containersInfo()['git']['purchases']['date'])
+                                        ->format('d-m-Y') . '] ' . $this->containersInfo()['git']['purchases']['message']
+                                )->value(fn() => 'Сервис закупок'),
+                            ],
+                            colSpan: 6,
+                            adaptiveColSpan: 6
+                        ),
+                        Column::make(
+                            [
+                                ValueMetric::make('[' .
+                                    Carbon::createFromTimestampUTC($this->containersInfo()['git']['search']['date'])
+                                        ->format('d-m-Y') . '] ' . $this->containersInfo()['git']['search']['message']
+                                )->value(fn() => 'Поисковая машина'),
+                            ],
+                            colSpan: 6,
+                            adaptiveColSpan: 6
+                        ),
+                    ]),
+                ]),
         ];
+    }
+
+    private function containersInfo(): array
+    {
+        try {
+            return Cache::remember('containers_informer', now()->addHour(),
+                function () {
+                    $return = Http::get(env('CONTAINERS_INFO_HOST', 'http://localhost'))->json();
+                    return is_array($return) ? $return : [];
+                }
+            );
+        } catch (Exception $exception) {
+            return ['error' => $exception->getMessage()];
+        }
     }
 }
