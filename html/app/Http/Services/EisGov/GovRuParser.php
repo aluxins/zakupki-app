@@ -125,7 +125,10 @@ class GovRuParser implements HttpInterface
         }
         // Местонахождение заказчика.
         if (preg_match('/^organization\/[0-9]+$/', $key)) {
-            $this->baseUri = Config::get('eisgov.gov_ru_parser.server_uri') . $this->params['registry_url'];
+            $this->baseUri =
+                str_contains($this->params['registry_url'], Config::get('eisgov.gov_ru_parser.server_uri'))
+                    ? $this->params['registry_url']
+                    : Config::get('eisgov.gov_ru_parser.server_uri') . $this->params['registry_url'];
             return;
         }
         $this->baseUri = $key;
@@ -203,10 +206,24 @@ class GovRuParser implements HttpInterface
                 // row pl-3 | blockFilesTabDocs
                 if (str_contains($this->params['typeFZ'], '44')) {
                     $search = 'blockFilesTabDocs';
+                    $organization_tag = 'span';
+                    $organization_val = 'cardMainInfo__content';
                 }
                 if (str_contains($this->params['typeFZ'], '223')) {
                     $search = 'row pl-3';
+                    $organization_tag = 'div';
+                    $organization_val = 'registry-entry__body-value';
                 }
+
+                $organization = $crawler->filterXPath($this->filterStr($organization_tag ?? '', 'class', $organization_val ?? ''))
+                    ->each(function (Crawler $node, $i) {
+                        $n = $node->children()->each(function (Crawler $node, $i) {
+                            return $node->attr('href');
+                        });
+                        return $n[0] ?? null;
+                    });
+                $organization = array_values(array_diff($organization, ['']))[0] ?? '';
+
                 $result = $crawler->filterXPath($this->filterStr('div', 'class', $search ?? ''))
                     ->each(function (Crawler $node, $i) {
                         return $node->filter('a')
@@ -255,7 +272,7 @@ class GovRuParser implements HttpInterface
 
             return [
                 'data' => $data ?? ''
-            ];
+            ] + (!empty($organization) ? ['organization' => $organization] : []);
         } catch (\Exception $e) {
             return ['error' => 'Parser error: ' . $e->getMessage()];
         }

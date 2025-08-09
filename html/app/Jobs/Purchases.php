@@ -43,7 +43,7 @@ class Purchases implements ShouldQueue
 
             $insertedPurchases = $this->processPurchases($result['data'], $this->data['query']['classifier'], $this->typeFZ);
             $this->logSuccess($result['data'], $insertedPurchases);
-            $this->dispatchPurchaseOrganization($result['data'], $insertedPurchases);
+            //$this->dispatchPurchaseOrganization($result['data'], $insertedPurchases);
             $this->dispatchPurchaseNumberJobs($result['data'], $insertedPurchases);
             $this->handleNextBatch($result);
 
