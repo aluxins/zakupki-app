@@ -255,6 +255,9 @@
       <path value="$PROJECT_DIR$/html/vendor/romanstruk/manticore-scout-engine" />
       <path value="$PROJECT_DIR$/html/vendor/php-debugbar/php-debugbar" />
       <path value="$PROJECT_DIR$/html/vendor/barryvdh/laravel-debugbar" />
+      <path value="$PROJECT_DIR$/html/vendor/moonshine/apexcharts" />
+      <path value="$PROJECT_DIR$/html/vendor/masterminds/html5" />
+      <path value="$PROJECT_DIR$/html/vendor/symfony/dom-crawler" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.2" />
