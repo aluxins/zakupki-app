@@ -85,6 +85,9 @@ class GovRuParser implements HttpInterface
                         )];
                     }
                 });
+            if(is_array($contents) and isset($contents['error'])) {
+                throw new RuntimeException($contents['error']);
+            }
             return $this->prepareContents($uri, $contents);
         } catch (Throwable $e) {
             return ['error' => sprintf(

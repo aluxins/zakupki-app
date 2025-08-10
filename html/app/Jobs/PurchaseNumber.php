@@ -52,7 +52,9 @@ class PurchaseNumber implements ShouldQueue
 
             $insertCount = $this->processFiles($result['data']);
 
-            PurchaseOrganization::dispatch($this->purchase_number, $result['organization'], $this->http);
+            if (isset($result['organization']) and $result['organization'] !== '') {
+                PurchaseOrganization::dispatch($this->purchase_number, $result['organization'], $this->http);
+            }
 
             Log::info('Files processed successfully', [
                 'files_updated' => $insertCount,
