@@ -79,8 +79,9 @@ class Purchase extends Model
                     'classifier',
                     'object_info',
                     'max_price',
-                    //'region',
+                    'placing_way',
                     'published_at',
+                    'finished_at',
                     'updated_at'
                 ]
             );

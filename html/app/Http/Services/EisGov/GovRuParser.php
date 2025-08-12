@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Config;
 use RuntimeException;
 use Symfony\Component\DomCrawler\Crawler;
 use Throwable;
-
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use Psr\Http\Message\RequestInterface;
@@ -165,7 +164,7 @@ class GovRuParser implements HttpInterface
     private function prepareContents(string $key, string $content): array
     {
         try {
-            // Create new instance for parser.
+            // Create a new instance for parser.
             $crawler = new Crawler($content, $key);
             //$crawler->addHtmlContent($content, 'UTF-8');
 
@@ -182,12 +181,15 @@ class GovRuParser implements HttpInterface
                             'type_fz' => $node->filterXPath($this->filterStr('div', 'class', 'col-9 p-0 registry-entry__header-top__title text-truncate'))->text(),
                             'published_at' => $node->filterXPath($this->filterStr('div', 'class', 'data-block mt-auto'))
                                 ->filterXPath($this->filterStr('div', 'class', 'data-block__value'))->first()->text(),
+                            'collecting_finished_at' => $node->filterXPath($this->filterStr('div', 'class', 'data-block mt-auto'))
+                                ->filterXPath($this->filterStr('div', 'class', 'data-block__value'))->last()->text(),
                             'classifier' => null,
                             'url' => $node->filterXPath($this->filterStr('div', 'class', 'registry-entry__header-mid__number'))
                                 ->filter('a')->attr('href'),
                             'registry_url' => $node->filterXPath($this->filterStr('div', 'class', 'registry-entry__body-href'))
                                 ->filter('a')->attr('href'),
                         ];
+                        preg_match('/котировок|аукцион/i', mb_strtolower($purchase['type_fz']), $placingWay);
                         return (object)[
                             'purchase_number' => preg_replace("~[^0-9]~i", "", $purchase['purchase_number']),
                             'purchase_type' => $purchase['purchase_type'] ?? (str_starts_with($purchase['type_fz'], '44-ФЗ') ? 'epNotificationEF2020_gov' : 'purchaseNoticeEP_gov'),
@@ -195,7 +197,9 @@ class GovRuParser implements HttpInterface
                             'max_price' => preg_replace("~[^0-9,]~i", "", $purchase['max_price']),
                             'region' => $purchase['region'],
                             'type_fz' => explode(' ', $purchase['type_fz'])[0] ?? null,
+                            'placingWay' => mb_strtolower($placingWay[0] ?? null),
                             'published_at' => Carbon::createFromFormat('d.m.Y', $purchase['published_at'])->format('Y-m-d H:i:s.u'),
+                            'collecting_finished_at' => Carbon::createFromFormat('d.m.Y', $purchase['collecting_finished_at'])->format('Y-m-d H:i:s'),
                             'classifier' => $purchase['classifier'],
                             'url' => $purchase['url'],
                             'registry_url' => $purchase['registry_url'],
@@ -276,7 +280,7 @@ class GovRuParser implements HttpInterface
             return [
                 'data' => $data ?? ''
             ] + (!empty($organization) ? ['organization' => $organization] : []);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return ['error' => 'Parser error: ' . $e->getMessage()];
         }
 
