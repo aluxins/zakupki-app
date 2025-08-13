@@ -32,5 +32,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->call(new ImportPurchases('fz223'))  ->hourlyAt([ 0, 15, 30, 45]);
         $schedule->call(new ImportPurchases('fz44'))   ->hourlyAt([ 5, 20, 35, 50]);
         $schedule->call(new ImportPurchasesGovRu())           ->hourlyAt([10, 25, 40, 55]);
+        $schedule->command('queue:retry all')        ->daily();
     })
     ->create();
