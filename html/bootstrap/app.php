@@ -5,6 +5,7 @@ use App\Http\Services\Schedules\ImportPurchasesGovRu;
 use App\Providers\AppServiceProvider;
 use App\Providers\RouteServiceProvider;
 use App\Providers\MoonShineServiceProvider;
+use App\Providers\OpenRouterServiceProvider;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -15,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         RouteServiceProvider::class,
         AppServiceProvider::class,
         MoonShineServiceProvider::class,
+        OpenRouterServiceProvider::class,
     ])
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
