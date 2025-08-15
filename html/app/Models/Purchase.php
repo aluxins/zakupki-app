@@ -19,7 +19,11 @@ use Throwable;
  * @property string $object_info
  * @property float $max_price
  * @property int $region
+ * @property string $type_fz
+ * @property string $placing_way
  * @property Carbon $published_at
+ * @property Carbon $finished_at
+ * @property Carbon $delivered_at
  * @property Carbon $created_at
  * @property Carbon $updated_at
  */
