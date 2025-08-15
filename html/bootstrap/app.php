@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Services\Schedules\AIQuestion;
 use App\Http\Services\Schedules\ImportPurchases;
 use App\Http\Services\Schedules\ImportPurchasesGovRu;
 use App\Providers\AppServiceProvider;
@@ -35,5 +36,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->call(new ImportPurchases('fz44'))   ->hourlyAt([ 5, 20, 35, 50]);
         $schedule->call(new ImportPurchasesGovRu())           ->hourlyAt([10, 25, 40, 55]);
         $schedule->command('queue:retry all')        ->daily();
+        $schedule->call(new AIQuestion('getDeliveryDate'))->daily()->name('getDeliveryDate');
+
+        //php artisan schedule:test --name getDeliveryDate
     })
     ->create();
