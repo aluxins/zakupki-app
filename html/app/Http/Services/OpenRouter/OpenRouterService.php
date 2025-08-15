@@ -86,7 +86,7 @@ class OpenRouterService implements OpenRouterInterface
         } catch (GuzzleException $e) {
             Log::error('OpenRouter API request failed', [
                 'error' => $e->getMessage(),
-                'content' => $content,
+                'content' => mb_substr($content, 0, 256),
                 'model' => $model
             ]);
 
@@ -99,7 +99,7 @@ class OpenRouterService implements OpenRouterInterface
         } catch (Exception $e) {
             Log::error('OpenRouter service error', [
                 'error' => $e->getMessage(),
-                'content' => $content,
+                'content' => mb_substr($content, 0, 256),
                 'model' => $model
             ]);
 
