@@ -66,8 +66,8 @@ class PurchasesController extends Controller
             $purchases = $query->paginate($perPage);
 
             return ApiResponse::success(
-                data: $purchases,
-                message: 'Purchases retrieved successfully'
+                message: 'Purchases retrieved successfully',
+                data: $purchases
             );
 
         } catch (Throwable $e) {
@@ -102,8 +102,8 @@ class PurchasesController extends Controller
             }
 
             return ApiResponse::success(
-                data: $purchase,
-                message: 'Purchase retrieved successfully'
+                message: 'Purchase retrieved successfully',
+                data: $purchase
             );
 
         } catch (Throwable $e) {
@@ -127,8 +127,8 @@ class PurchasesController extends Controller
         $dto = IndexingDTO::from($file);
         FilesIndexing::dispatch([$dto->toArray()]);
         return ApiResponse::success(
-            data: $file,
-            message: 'Re-indexed successfully'
+            message: 'Re-indexed successfully',
+            data: $file
         );
         } catch (Throwable $e) {
             Log::error('Failed to Re-indexed file', [

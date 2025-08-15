@@ -8,7 +8,7 @@ use Illuminate\Http\JsonResponse;
 
 class ApiResponse
 {
-    public static function success(mixed $data = null, string $message = 'Success', int $code = 200): JsonResponse
+    public static function success(string $message = 'Success', mixed $data = null, int $code = 200): JsonResponse
     {
         return response()->json([
             'status' => 'success',
@@ -25,4 +25,4 @@ class ApiResponse
             'errors' => $errors
         ], $code);
     }
-} 
+}
