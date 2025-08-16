@@ -93,6 +93,9 @@ class PurchaseResource extends ModelResource
             Date::make('Создано', 'published_at')->format('d.m.Y')
                 ->sortable()->customWrapperAttributes(['style' => 'vertical-align:top']),
 
+            Date::make('Срок', 'delivered_at')->format('d.m.Y')
+                ->sortable()->customWrapperAttributes(['style' => 'vertical-align:top']),
+
             Text::make(__('Регион'), 'region', fn($item) => CodesSubjects::get()->one((int) $item->region))
                 ->sortable()->customWrapperAttributes(['style' => 'vertical-align:top']),
 
