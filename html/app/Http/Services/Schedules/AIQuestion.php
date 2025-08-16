@@ -18,6 +18,7 @@ use RuntimeException;
  */
 final readonly class AIQuestion
 {
+    const DELAY_SEND_JOB = 30; // seconds.
     public function __invoke(): void
     {
         $this->validateConfig($this->method);
@@ -55,6 +56,7 @@ final readonly class AIQuestion
                 ->whereNull('delivered_at');
 
             $result = ['success' => [], 'failed' => []];
+            $delay = 0;
             foreach ($purchases as $purchase) {
                 $addDay = match ($purchase->placing_way) {
                     'аукцион' => 10,
@@ -73,14 +75,16 @@ final readonly class AIQuestion
                 $content_str = implode(' ', $content);
                 if (mb_strlen($content_str) > 100) {
                     $content_str = mb_substr($content_str, 0, 163839);
-                    $this->getQuestion($query . " \n" . $content_str, $this->method, $purchase);
+                    $this->getQuestion($query . " \n" . $content_str, $this->method, $purchase, $delay);
                     $result['success'][] = $purchase->purchase_number;
+                    $delay += self::DELAY_SEND_JOB;
                 } else {
                     $result['failed'][] = $purchase->purchase_number;
                 }
             }
             $this->logSuccess([
                 'purchases' => $purchases->count(),
+                'count_success' => count($result['success']),
                 'result' => $result,
             ]);
         } catch (Exception $e) {
@@ -90,9 +94,9 @@ final readonly class AIQuestion
         }
     }
 
-    private function getQuestion(string $query, string $method, Purchase $purchase): void
+    private function getQuestion(string $query, string $method, Purchase $purchase, int $delay): void
     {
-        AIQuestionJob::dispatch($query, $method, $purchase);
+        AIQuestionJob::dispatch($query, $method, $purchase)->delay(now()->addSeconds($delay));
     }
 
     private function logSuccess(array $data): void
