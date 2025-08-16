@@ -35,6 +35,7 @@ use App\MoonShine\Resources\UserResource;
 use MoonShine\MenuManager\MenuItem;
 use App\MoonShine\Resources\PurchaseResource;
 use App\MoonShine\Resources\FileResource;
+use App\MoonShine\Resources\AIMessageResource;
 
 final class MoonShineLayout extends AppLayout
 {
@@ -58,6 +59,7 @@ final class MoonShineLayout extends AppLayout
                     )->toDateString();
             }),
             MenuItem::make('Файлы', FileResource::class),
+            MenuItem::make('Запросы ИИ', AIMessageResource::class),
             MenuItem::make('Пользователи', UserResource::class),
             ...parent::menu(),
         ];
