@@ -133,9 +133,41 @@ class PurchaseResource extends ModelResource
 
             $this->createPurchaseUrlField(),
             LineBreak::make(),
-            Text::make(__('object_info'), 'object_info')->changePreview(fn($value, Text $ctx) => $ctx->getData()->getOriginal()->object_info),
+            Text::make(__('object_info'), 'object_info')
+                ->changePreview(function ($value, Text $ctx) {
+                    $object_info = $ctx->getData()->getOriginal()->object_info;
+                    if(request()->has('filter.object_info')){
+                        $object_info = $this->searchHighlights($object_info, request()->get('filter')['object_info']);
+                    }
+                    return $object_info;
+                }),
             $this->createFilesField(),
         ]);
+    }
+
+    /**
+     * Выделение искомых слов в тексте.
+     * @param string $searchString
+     * @param string $toHighlight
+     * @return string
+     */
+    function searchHighlights(string $searchString, string $toHighlight): string
+    {
+        $words = explode(' ', $toHighlight);
+        $searchFor = array_map(
+            fn($word) => "/" . $word . '[^ \(\),\,,.,?,\.]*/ui',
+            $words
+        );
+        return preg_replace_callback(
+            $searchFor,
+            fn($word) => sprintf(
+                "%s%s%s",
+                Config::get('manticore.highlight_options.before_match'),
+                $word[0],
+                Config::get('manticore.highlight_options.after_match')
+            ),
+            $searchString
+        );
     }
 
     /**
@@ -284,10 +316,13 @@ class PurchaseResource extends ModelResource
                 ->multiple(),
             DateRange::make('Дата публикации', 'published_at'),
             DateRange::make('Срок поставки', 'delivered_at'),
+            Text::make('Поиск по названию', 'object_info'),
+            LineBreak::make()->setAttribute('class', 'layout-navigation'),
             Text::make('Поиск по файлам', 'files_search')->canApply(fn() => false),
             Switcher::make('Строгий поиск', 'strict_search')->canApply(fn() => false)
                 ->hint('Точная последовательность слов друг за другом.')
                 ->default(1),
+            LineBreak::make()->setAttribute('class', 'layout-navigation'),
         ];
     }
 
@@ -300,6 +335,6 @@ class PurchaseResource extends ModelResource
 
     protected function search(): array
     {
-        return ['purchase_number', 'object_info'];
+        return ['purchase_number'];
     }
 }
