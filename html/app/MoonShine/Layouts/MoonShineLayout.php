@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\MoonShine\Layouts;
 
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Config;
 use MoonShine\Laravel\Layouts\AppLayout;
 use MoonShine\ColorManager\ColorManager;
 use MoonShine\Contracts\ColorManager\ColorManagerContract;
@@ -39,7 +40,6 @@ use App\MoonShine\Resources\AIMessageResource;
 
 final class MoonShineLayout extends AppLayout
 {
-    const SHOW_PURCHASES_LAST_DAYS = 7;
 
     protected function assets(): array
     {
@@ -55,7 +55,7 @@ final class MoonShineLayout extends AppLayout
             MenuItem::make('Закупки', function () {
                 $url = MenuItem::make('Закупки', PurchaseResource::class)->getUrl();
                 return $url . '?filter[published_at][from]=' . Carbon::now()->subDays(
-                        self::SHOW_PURCHASES_LAST_DAYS
+                        Config::get('app.purchases.show_purchases_last_days')
                     )->toDateString();
             }),
             MenuItem::make('Файлы', FileResource::class),
