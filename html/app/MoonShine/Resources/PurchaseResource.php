@@ -300,6 +300,6 @@ class PurchaseResource extends ModelResource
 
     protected function search(): array
     {
-        return ['purchase_number'];
+        return ['purchase_number', 'object_info'];
     }
 }
