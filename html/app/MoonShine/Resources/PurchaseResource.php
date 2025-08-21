@@ -136,7 +136,7 @@ class PurchaseResource extends ModelResource
             Text::make(__('object_info'), 'object_info')
                 ->changePreview(function ($value, Text $ctx) {
                     $object_info = $ctx->getData()->getOriginal()->object_info;
-                    if(request()->has('filter.object_info')){
+                    if(request()->has('filter.object_info') && !empty(request()->get('filter')['object_info'])){
                         $object_info = $this->searchHighlights($object_info, request()->get('filter')['object_info']);
                     }
                     return $object_info;
