@@ -283,6 +283,7 @@ class PurchaseResource extends ModelResource
                 ->options(CodesSubjects::get()->sortNumber()->withNumber()->all())
                 ->multiple(),
             DateRange::make('Дата публикации', 'published_at'),
+            DateRange::make('Срок поставки', 'delivered_at'),
             Text::make('Поиск по файлам', 'files_search')->canApply(fn() => false),
             Switcher::make('Строгий поиск', 'strict_search')->canApply(fn() => false)
                 ->hint('Точная последовательность слов друг за другом.')
