@@ -71,7 +71,9 @@ final readonly class AIQuestion
                 $manticore = File::search('', fn(Builder $builder) => $builder
                     ->select(['name', 'content']))
                     ->where('reg_number', $purchase->purchase_number);
-                $content = Arr::pluck($manticore->raw()['hits'] ?? [], 'content');
+                $files = $manticore->raw()['hits'] ?? [];
+                $this->sortContract($files);
+                $content = Arr::pluck($files, 'content');
                 $content_str = implode(' ', $content);
                 if (mb_strlen($content_str) > 100) {
                     $content_str = mb_substr($content_str, 0, 163839);
@@ -107,5 +109,45 @@ final readonly class AIQuestion
     private function logFailed(array $data): void
     {
         Log::error('AI Question failed for method ' . $this->method, $data);
+    }
+
+
+    /**
+     * Поиск ключевых слов в строке.
+     * @param string $searchString
+     * @return bool
+     */
+    private function searchContract(string $searchString): bool
+    {
+        $words = explode(' ', 'проект контракт договор');
+        foreach ($words as $word) {
+            preg_match(
+                "/" . $word . '[^.]*/ui',
+                $searchString,
+                $matches
+            );
+            if ($matches) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Перемещение текста договора первым элементом массива.
+     * @param array $content
+     * @return void
+     */
+    private function sortContract(array &$content): void
+    {
+        foreach ($content as &$hit) {
+            $hit['sort'] = 0;
+            if ($this->searchContract($hit['name'])) {
+                $hit['sort'] = 1;
+            }
+        }
+        usort($content, function ($item1, $item2) {
+            return $item2['sort'] <=> $item1['sort'];
+        });
     }
 }
