@@ -59,6 +59,7 @@ class AIQuestionJob implements ShouldQueue
         /** @var Purchase $purchase */
         $purchase = $this->model;
         AiMessage::updateOrCreate(
+            $purchase->id,
             $this->method . '_' . $purchase->purchase_number,
             mb_substr($query, 0, 512),
             json_encode($response)

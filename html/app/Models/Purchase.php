@@ -13,6 +13,7 @@ use RuntimeException;
 use Throwable;
 
 /**
+ * @property int $id
  * @property string $purchase_number
  * @property string $purchase_type
  * @property string $classifier
