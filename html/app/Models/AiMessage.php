@@ -4,13 +4,15 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\DB;
 
 class AiMessage extends Model
 {
-    public static function updateOrCreate(string $key, string $question, $response): int
+    public static function updateOrCreate(int $purchase_id, string $key, string $question, $response): int
     {
         $data = [
+            'purchase_id' => $purchase_id,
             'key' => $key,
             'question' => $question,
             'response' => $response
@@ -32,5 +34,10 @@ class AiMessage extends Model
         $now = Carbon::now();
         $data['created_at'] = $now;
         $data['updated_at'] = $now;
+    }
+
+    public function purchase(): HasOne
+    {
+        return $this->hasOne(Purchase::class, 'id', 'purchase_id');
     }
 }
