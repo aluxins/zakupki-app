@@ -11,12 +11,14 @@ use App\MoonShine\Pages\AIMessage\AIMessageFormPage;
 use App\MoonShine\Pages\AIMessage\AIMessageDetailPage;
 
 use MoonShine\Laravel\Enums\Action;
+use MoonShine\Laravel\Pages\Crud\IndexPage;
 use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\Laravel\Pages\Page;
 use MoonShine\Support\ListOf;
 use MoonShine\UI\Fields\Date;
 use MoonShine\UI\Fields\ID;
 use MoonShine\UI\Fields\Text;
+use MoonShine\UI\Fields\Url;
 
 /**
  * @extends ModelResource<AiMessage, AIMessageIndexPage, AIMessageFormPage, AIMessageDetailPage>
@@ -49,7 +51,16 @@ class AIMessageResource extends ModelResource
     {
         return [
             ID::make()->sortable(),
-            Text::make('Указатель', 'key'),
+            Url::make('Закупка')
+                ->changePreview(fn($value, Url $ctx) => '<a target="_blank" href="' . toPage(
+                        page: IndexPage::class,
+                        resource: PurchaseResource::class
+                    ) . '?search=' . $ctx->getData()->getOriginal()->purchase->purchase_number . '">' . $ctx->getData(
+                    )->getOriginal()->purchase->purchase_number . '</a>'
+                ),
+            Text::make('Метод', 'key')->changePreview(
+                fn($value, Text $ctx) => $this->nameMethod(explode('_', $ctx->getData()->getOriginal()->key)[0] ?? '')
+            ),
             //Text::make('Запрос', 'question'),
             //Text::make('Ответ', 'response'),
             Date::make('Создано', 'created_at')
@@ -59,6 +70,14 @@ class AIMessageResource extends ModelResource
                 ->format('d.m.Y H:i:s')
                 ->sortable(),
         ];
+    }
+
+    private function nameMethod(string $method): string
+    {
+        return match ($method) {
+            'getDeliveryDate' => 'Срок поставки',
+            default => $method
+        };
     }
 
     /**
