@@ -21,7 +21,7 @@ class AiMessage extends Model
         return DB::table('ai_messages')->upsert(
             $data,
             ['key'],
-            ['question', 'response', 'updated_at']
+            ['purchase_id', 'question', 'response', 'updated_at']
         );
     }
 
