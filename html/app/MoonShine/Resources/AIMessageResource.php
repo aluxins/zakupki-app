@@ -52,12 +52,14 @@ class AIMessageResource extends ModelResource
         return [
             ID::make()->sortable(),
             Url::make('Закупка')
-                ->changePreview(fn($value, Url $ctx) => '<a target="_blank" href="' . toPage(
-                        page: IndexPage::class,
-                        resource: PurchaseResource::class
-                    ) . '?search=' . $ctx->getData()->getOriginal()->purchase->purchase_number . '">' . $ctx->getData(
-                    )->getOriginal()->purchase->purchase_number . '</a>'
-                ),
+                ->changePreview(function ($value, Url $ctx) {
+                    $purchase = $ctx->getData()->getOriginal()->purchase;
+                    $purchase_number = $purchase->purchase_number ?? '';
+                    return '<a target="_blank" href="' . toPage(
+                            page: IndexPage::class,
+                            resource: PurchaseResource::class
+                        ) . '?search=' . $purchase_number . '">' . $purchase_number . '</a>';
+                }),
             Text::make('Метод', 'key')->changePreview(
                 fn($value, Text $ctx) => $this->nameMethod(explode('_', $ctx->getData()->getOriginal()->key)[0] ?? '')
             ),
