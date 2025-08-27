@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Services\DatabaseLogger\DatabaseLogger;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
@@ -125,6 +126,12 @@ return [
 
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
+        ],
+
+        'db' => [
+            'driver' => 'custom',
+            'via' => DatabaseLogger::class,
+            'days' => 7, // Optional, retention period in days
         ],
 
     ],
