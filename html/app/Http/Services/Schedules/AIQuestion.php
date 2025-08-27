@@ -104,11 +104,13 @@ final readonly class AIQuestion
     private function logSuccess(array $data): void
     {
         Log::info('AI Question success for method ' . $this->method, $data);
+        Log::channel('db')->info('AI Question success for method ' . $this->method, $data);
     }
 
     private function logFailed(array $data): void
     {
         Log::error('AI Question failed for method ' . $this->method, $data);
+        Log::channel('db')->error('AI Question failed for method ' . $this->method, $data);
     }
 
 
