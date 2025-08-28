@@ -74,7 +74,23 @@ final class MoonShineLayout extends AppLayout
     {
         parent::colors($colorManager);
 
-        // $colorManager->primary('#00000');
+        // Установка цветов фона
+        $colorManager->content('22, 24, 28');
+
+        // Установка цветов контента
+        $colorManager->background('29, 31, 37');
+
+        // Основной цвет
+        $colorManager->primary('40, 67, 143');
+        // Вторичный цвет
+        $colorManager->secondary('53, 69, 103');
+
+        // Настройка компонентов интерфейса
+        $colorManager->tableRow('35, 38, 45'); // Строки таблицы
+        $colorManager->borders('53, 69, 103'); // Границы
+        $colorManager->dropdowns('48, 61, 93'); // Выпадающие списки
+        $colorManager->buttons('83, 103, 132'); // Кнопки
+        $colorManager->dividers('74, 90, 121'); // Разделители
     }
 
     public function build(): Layout
