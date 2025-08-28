@@ -15,6 +15,7 @@ use App\MoonShine\Resources\UserResource;
 use App\MoonShine\Resources\PurchaseResource;
 use App\MoonShine\Resources\FileResource;
 use App\MoonShine\Resources\AIMessageResource;
+use App\MoonShine\Resources\LogMessageResource;
 
 class MoonShineServiceProvider extends ServiceProvider
 {
@@ -33,6 +34,7 @@ class MoonShineServiceProvider extends ServiceProvider
                 PurchaseResource::class,
                 FileResource::class,
                 AIMessageResource::class,
+                LogMessageResource::class,
             ])
             ->pages([
                 ...$config->getPages(),

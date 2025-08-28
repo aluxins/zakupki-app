@@ -37,6 +37,7 @@ use MoonShine\MenuManager\MenuItem;
 use App\MoonShine\Resources\PurchaseResource;
 use App\MoonShine\Resources\FileResource;
 use App\MoonShine\Resources\AIMessageResource;
+use App\MoonShine\Resources\LogMessageResource;
 
 final class MoonShineLayout extends AppLayout
 {
@@ -55,11 +56,12 @@ final class MoonShineLayout extends AppLayout
             MenuItem::make('Закупки', function () {
                 $url = MenuItem::make('Закупки', PurchaseResource::class)->getUrl();
                 return $url . '?filter[published_at][from]=' . Carbon::now()->subDays(
-                        Config::get('app.purchases.show_purchases_last_days')
+                        Config::get('app.purchases.show_purchases_last_days'),
                     )->toDateString();
             }),
             MenuItem::make('Файлы', FileResource::class),
             MenuItem::make('Запросы ИИ', AIMessageResource::class),
+            MenuItem::make('Логи', LogMessageResource::class),
             MenuItem::make('Пользователи', UserResource::class),
             ...parent::menu(),
         ];
