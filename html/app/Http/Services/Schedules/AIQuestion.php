@@ -45,19 +45,35 @@ final readonly class AIQuestion
     private function getDeliveryDate(): void
     {
         try {
-            $purchases = Purchase::all()
-                ->whereIn('region', Config::get('openrouter.jobs.getDeliveryDate.regions'))
-                ->where('max_price', '>=', Config::get('openrouter.jobs.getDeliveryDate.min_price'))
-                ->where(
+            $purchases = Purchase::query()
+                ->select()
+                ->join('ai_messages', 'purchases.id', '=', 'ai_messages.purchase_id', 'left');
+            if($regions = Config::get('openrouter.jobs.getDeliveryDate.regions') and count($regions)) {
+                $purchases->whereIn('region', $regions);
+            }
+            if($min_price = Config::get('openrouter.jobs.getDeliveryDate.min_price')){
+                $purchases->where('max_price', '>=', $min_price);
+            }
+            if($max_price = Config::get('openrouter.jobs.getDeliveryDate.max_price')){
+                $purchases->where('max_price', '<=', $max_price);
+            }
+            if($last_days = Config::get('openrouter.jobs.getDeliveryDate.last_days')){
+                $purchases->where(
                     'published_at',
                     '>=',
-                    Carbon::now()->subDays(Config::get('openrouter.jobs.getDeliveryDate.last_days'))->format('Y-m-d')
-                )
-                ->whereNull('delivered_at');
+                    Carbon::now()->subDays($last_days)->format('Y-m-d')
+                );
+            }
+            $purchases->whereNull('delivered_at');
 
             $result = ['success' => [], 'failed' => []];
             $delay = 0;
-            foreach ($purchases as $purchase) {
+            foreach ($purchases->get() as $purchase) {
+                /** @var Purchase $purchase */
+                if (isset($purchase->key) and str_contains((string)$purchase->key, "getDeliveryDate")) {
+                    continue;
+                }
+
                 $addDay = match ($purchase->placing_way) {
                     'аукцион' => 10,
                     'котировок' => 3,
@@ -96,6 +112,14 @@ final readonly class AIQuestion
         }
     }
 
+    /**
+     * Создает задание ИИ.
+     * @param string $query
+     * @param string $method
+     * @param Purchase $purchase
+     * @param int $delay
+     * @return void
+     */
     private function getQuestion(string $query, string $method, Purchase $purchase, int $delay): void
     {
         AIQuestionJob::dispatch($query, $method, $purchase)->delay(now()->addSeconds($delay));
