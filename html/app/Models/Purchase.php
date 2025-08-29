@@ -147,4 +147,9 @@ class Purchase extends Model
     {
         return $this->hasMany(File::class);
     }
+
+    public function aiMessages(): HasMany
+    {
+        return $this->hasMany(AiMessage::class);
+    }
 }
