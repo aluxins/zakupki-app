@@ -46,8 +46,8 @@ final readonly class AIQuestion
     {
         try {
             $purchases = Purchase::query()
-                ->select()
-                ->join('ai_messages', 'purchases.id', '=', 'ai_messages.purchase_id', 'left');
+                ->select();
+                //->join('ai_messages', 'purchases.id', '=', 'ai_messages.purchase_id', 'left');
             if($regions = Config::get('openrouter.jobs.getDeliveryDate.regions') and count($regions)) {
                 $purchases->whereIn('region', $regions);
             }
@@ -70,7 +70,18 @@ final readonly class AIQuestion
             $delay = 0;
             foreach ($purchases->get() as $purchase) {
                 /** @var Purchase $purchase */
-                if (isset($purchase->key) and str_contains((string)$purchase->key, "getDeliveryDate")) {
+
+                // Исключить закупки с ранее выполненной попыткой определения даты поставки.
+                /*if (isset($purchase->key) and str_contains((string)$purchase->key, "getDeliveryDate")) {
+                    continue;
+                }*/
+                $flag = false;
+                foreach ($purchase->aiMessages()->get() as $aiMessage) {
+                    if (str_contains((string)$aiMessage->key, "getDeliveryDate")) {
+                        $flag = true;
+                    }
+                }
+                if($flag) {
                     continue;
                 }
 
@@ -93,7 +104,7 @@ final readonly class AIQuestion
                 $content_str = implode(' ', $content);
                 if (mb_strlen($content_str) > 100) {
                     $content_str = mb_substr($content_str, 0, 163839);
-                    $this->getQuestion($query . " \n" . $content_str, $this->method, $purchase, $delay);
+                    $this->getQuestion($query . " \n" . $content_str, $this->method, Purchase::all()->where('purchase_number', '=', $purchase->purchase_number)->first(), $delay);
                     $result['success'][] = $purchase->purchase_number;
                     $delay += self::DELAY_SEND_JOB;
                 } else {
