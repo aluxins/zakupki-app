@@ -24,8 +24,9 @@ return [
 
     'jobs' => [
         'getDeliveryDate' => [
-            'regions' => [24, 38, 03, 75, 17, 28, 27, 25, 79],
-            'min_price' => '1000000',
+            'regions' => [], //24, 38, 03, 75, 17, 28, 27, 25, 79
+            'min_price' => '900000',
+            'max_price' => '7000000',
             'last_days' => 3
         ],
     ]
