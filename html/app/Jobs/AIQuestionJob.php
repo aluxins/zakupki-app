@@ -20,6 +20,21 @@ class AIQuestionJob implements ShouldQueue
     use Queueable;
 
     /**
+     *
+     * @var int
+     */
+    public int $tries = 3;
+
+    /**
+     *
+     * @return array<int, int>
+     */
+    public function backoff(): array
+    {
+        return [10*60, 30*60, 60*60];
+    }
+
+    /**
      * Create a new job instance.
      * @param string $query
      * @param string $method
