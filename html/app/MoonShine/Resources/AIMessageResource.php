@@ -4,17 +4,25 @@ declare(strict_types=1);
 
 namespace App\MoonShine\Resources;
 
+use App\Helpers\CodesSubjects;
+use Closure;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\AiMessage;
 use App\MoonShine\Pages\AIMessage\AIMessageIndexPage;
 use App\MoonShine\Pages\AIMessage\AIMessageFormPage;
 use App\MoonShine\Pages\AIMessage\AIMessageDetailPage;
 
+use Illuminate\Support\Carbon;
+use MoonShine\Contracts\UI\Collection\TableRowsContract;
+use MoonShine\Contracts\UI\TableRowContract;
 use MoonShine\Laravel\Enums\Action;
 use MoonShine\Laravel\Pages\Crud\IndexPage;
 use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\Laravel\Pages\Page;
 use MoonShine\Support\ListOf;
+use MoonShine\UI\Collections\TableRows;
+use MoonShine\UI\Components\Table\TableRow;
+use MoonShine\UI\Components\Table\TableTh;
 use MoonShine\UI\Fields\Date;
 use MoonShine\UI\Fields\ID;
 use MoonShine\UI\Fields\Text;
@@ -71,7 +79,54 @@ class AIMessageResource extends ModelResource
             Date::make('Изменено', 'updated_at')
                 ->format('d.m.Y H:i:s')
                 ->sortable(),
+            Text::make('Описание', 'object_info')
+                ->changePreview(function ($value, Text $ctx) {
+                    $purchase = $ctx->getData()->getOriginal()->purchase;
+                    return implode(' - ', [
+                        Carbon::parse($purchase->delivered_at ?? '')->format('d.m.Y'),
+                        CodesSubjects::get()->one($purchase->region ?? 0),
+                        $purchase->object_info ?? '',
+                    ]);
+                }),
         ];
+    }
+
+    /**
+     * Переопределение тела таблицы. Строкам TR назначить кастомное представление. Строка разбивается на две строки.
+     * @return TableRowsContract|Closure|null
+     */
+    protected function tbody(): null|TableRowsContract|Closure
+    {
+        return static function (TableRowsContract $default) {
+            foreach ($default as $item) {
+                $item->onBeforeRender(function (TableRow $field) {
+                    return $field->customView('admin.components.table-double-row')->customAttributes(
+                        ['data-double-row' => 'object_info']
+                    );
+                });
+            }
+            return $default;
+        };
+    }
+
+    /**
+     * Переопределение шапки таблицы. Скрытие столбца object_info.
+     * @return TableRowsContract|Closure|null
+     */
+    protected function thead(): null|TableRowsContract|Closure
+    {
+        return static function (TableRowContract $default) {
+            foreach ($default->getCells() as $item) {
+                $item->onBeforeRender(function (TableTh $field) {
+                    if ($field->getAttribute('data-column-selection') == 'object_info') {
+                        $field->class('hidden');
+                    }
+                    return $field;
+                }
+                );
+            }
+            return TableRows::make([$default]);
+        };
     }
 
     private function nameMethod(string $method): string
