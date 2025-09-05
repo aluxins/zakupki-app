@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\MoonShine\Resources;
 
 use App\Helpers\CodesSubjects;
+use App\Helpers\DoubleRowFields;
 use App\Models\File;
 use App\Models\Purchase;
 use App\MoonShine\Pages\Purchase\PurchaseDetailPage;
@@ -12,6 +13,7 @@ use App\MoonShine\Pages\Purchase\PurchaseIndexPage;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use MoonShine\Laravel\Fields\Relationships\HasMany;
+use MoonShine\Laravel\Pages\Crud\IndexPage;
 use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\Laravel\Pages\Page;
 use MoonShine\Support\Enums\SortDirection;
@@ -37,6 +39,8 @@ use Throwable;
  */
 class PurchaseResource extends ModelResource
 {
+    use DoubleRowFields;
+
     protected string $model = Purchase::class;
 
     protected string $title = 'Закупки';
@@ -51,6 +55,10 @@ class PurchaseResource extends ModelResource
 
     protected string $sortColumn = 'published_at';
     protected SortDirection $sortDirection = SortDirection::DESC;
+
+    static protected array $double_row_fields = [
+        'list_files',
+    ];
 
     /**
      * Возвращает список страниц ресурса
@@ -87,6 +95,19 @@ class PurchaseResource extends ModelResource
 
             $this->createMainFieldset(),
 
+            Url::make('Номер', 'purchase_number')
+                ->changePreview(function ($value, Url $ctx) {
+                    $purchase_number = $ctx->getData()->getOriginal()->purchase_number;
+                    return '<a target="_blank" href="' . toPage(
+                            page: IndexPage::class,
+                            resource: PurchaseResource::class
+                        ) . '?search=' . $purchase_number . '">' . $purchase_number . '</a>';
+                }),
+
+            Text::make('ФЗ', 'type_fz')
+                ->changePreview(fn($value, Text $ctx) => $ctx->getData()->getOriginal()->type_fz == 'fz44' ? '44-ФЗ' : '233-ФЗ'
+            ),
+
             Number::make(__('Цена'), 'max_price', fn($item) => number_format($item->max_price, 2) . ' ₽')
                 ->sortable()->customWrapperAttributes(['style' => 'vertical-align:top']),
 
@@ -108,7 +129,7 @@ class PurchaseResource extends ModelResource
      */
     private function createMainFieldset(): Fieldset
     {
-        return Fieldset::make('', [
+        return Fieldset::make('list_files', [
             $this->createPurchaseFields(),
             $this->createFileSearchField(),
         ])->customWrapperAttributes(['width' => '99%']);
