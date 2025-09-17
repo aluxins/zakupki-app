@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Helpers;
+namespace App\MoonShine\Helpers;
 
 use Closure;
 use MoonShine\Contracts\UI\Collection\TableRowsContract;
