@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace App\MoonShine\Resources;
 
 use App\Helpers\CodesSubjects;
-use App\Helpers\DoubleRowFields;
-use Closure;
-use Illuminate\Database\Eloquent\Model;
+use App\MoonShine\Helpers\DoubleRowFields;
 use App\Models\AiMessage;
 use App\MoonShine\Pages\AIMessage\AIMessageIndexPage;
 use App\MoonShine\Pages\AIMessage\AIMessageFormPage;
@@ -18,7 +16,6 @@ use MoonShine\Laravel\Enums\Action;
 use MoonShine\Laravel\Pages\Crud\IndexPage;
 use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\Laravel\Pages\Page;
-use MoonShine\Support\Enums\ClickAction;
 use MoonShine\Support\ListOf;
 use MoonShine\UI\Fields\Date;
 use MoonShine\UI\Fields\ID;
@@ -82,9 +79,8 @@ class AIMessageResource extends ModelResource
             Date::make('Создано', 'created_at')
                 ->format('d.m.Y H:i:s')
                 ->sortable(),
-            Date::make('Изменено', 'updated_at')
-                ->format('d.m.Y H:i:s')
-                ->sortable(),
+            /*Date::make('Изменено', 'updated_at')
+                ->format('d.m.Y H:i:s'),*/
             Text::make('Описание', 'object_info')
                 ->changePreview(function ($value, Text $ctx) {
                     $purchase = $ctx->getData()->getOriginal()->purchase;
