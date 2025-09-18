@@ -7,6 +7,7 @@ use App\Providers\AppServiceProvider;
 use App\Providers\RouteServiceProvider;
 use App\Providers\MoonShineServiceProvider;
 use App\Providers\OpenRouterServiceProvider;
+use App\Providers\FavoritesServiceProvider;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -18,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         AppServiceProvider::class,
         MoonShineServiceProvider::class,
         OpenRouterServiceProvider::class,
+        FavoritesServiceProvider::class,
     ])
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
