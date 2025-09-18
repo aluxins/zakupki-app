@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\PurchasesController;
 use App\Http\Controllers\Api\TestController;
 use App\Http\Controllers\Api\V1\OpenRouterController;
 use App\Http\Controllers\Api\V1\OpenRouterExampleController;
+use App\Http\Controllers\Api\V1\FavoritesController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -43,4 +44,17 @@ Route::prefix('openrouter/examples')->group(function () {
     Route::post('/advanced', [OpenRouterExampleController::class, 'advancedUsage']);
     Route::get('/models-info', [OpenRouterExampleController::class, 'modelsInfo']);
     Route::post('/facade', [OpenRouterExampleController::class, 'facadeUsage']);
+});
+
+// Маршруты для работы с избранным
+Route::prefix('favorites')->group(function () {
+    Route::post('/add', [FavoritesController::class, 'addToFavorites']);
+    Route::delete('/remove', [FavoritesController::class, 'removeFromFavorites']);
+    Route::post('/toggle', [FavoritesController::class, 'toggleFavorite']);
+    Route::get('/check', [FavoritesController::class, 'isFavorite']);
+    Route::get('/list', [FavoritesController::class, 'getFavorites']);
+    Route::get('/count', [FavoritesController::class, 'getFavoriteCount']);
+    Route::post('/folders', [FavoritesController::class, 'createFolder']);
+    Route::get('/folders', [FavoritesController::class, 'getFolders']);
+    Route::delete('/folders/{folderId}', [FavoritesController::class, 'deleteFolder']);
 });

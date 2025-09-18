@@ -5,23 +5,35 @@ declare(strict_types=1);
 namespace App\MoonShine\Resources;
 
 use App\Helpers\CodesSubjects;
-use App\Helpers\DoubleRowFields;
+use App\Http\Services\Favorites\FavoritesFacade;
 use App\Models\File;
 use App\Models\Purchase;
+use App\MoonShine\Helpers\DoubleRowFields;
+use App\MoonShine\Helpers\ToggleFavorite;
 use App\MoonShine\Pages\Purchase\PurchaseDetailPage;
+use App\MoonShine\Pages\Purchase\PurchaseFormPage;
 use App\MoonShine\Pages\Purchase\PurchaseIndexPage;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use MoonShine\Laravel\Enums\Action;
 use MoonShine\Laravel\Fields\Relationships\HasMany;
+use MoonShine\Laravel\Http\Responses\MoonShineJsonResponse;
+use MoonShine\Laravel\MoonShineRequest;
 use MoonShine\Laravel\Pages\Crud\IndexPage;
 use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\Laravel\Pages\Page;
 use MoonShine\Support\Enums\SortDirection;
 use MoonShine\Support\ListOf;
+use MoonShine\UI\Components\ActionButton;
+use MoonShine\UI\Components\Layout\Div;
 use MoonShine\UI\Components\Layout\LineBreak;
+use MoonShine\UI\Fields\Checkbox;
 use MoonShine\UI\Fields\Date;
 use MoonShine\UI\Fields\DateRange;
 use MoonShine\UI\Fields\Fieldset;
+use MoonShine\UI\Fields\ID;
 use MoonShine\UI\Fields\Json;
 use MoonShine\UI\Fields\Number;
 use MoonShine\UI\Fields\Range;
@@ -40,6 +52,7 @@ use Throwable;
 class PurchaseResource extends ModelResource
 {
     use DoubleRowFields;
+    use ToggleFavorite;
 
     protected string $model = Purchase::class;
 
@@ -120,7 +133,7 @@ class PurchaseResource extends ModelResource
             Text::make(__('Регион'), 'region', fn($item) => CodesSubjects::get()->one((int) $item->region))
                 ->sortable()->customWrapperAttributes(['style' => 'vertical-align:top']),
 
-            //HasMany::make('files', 'files', FileResource::class)->disableOutside(),
+            $this->switcherFavorite()
         ];
     }
 
@@ -349,11 +362,9 @@ class PurchaseResource extends ModelResource
 
     protected function activeActions(): ListOf
     {
-        return parent::activeActions()->empty();
-            //->only(Action::VIEW);
+        return parent::activeActions()
+            ->only(Action::VIEW);
     }
-
-
     protected function search(): array
     {
         return ['purchase_number'];

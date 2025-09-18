@@ -7,6 +7,7 @@ namespace App\MoonShine\Resources;
 use App\Helpers\CodesSubjects;
 use App\MoonShine\Helpers\DoubleRowFields;
 use App\Models\AiMessage;
+use App\MoonShine\Helpers\ToggleFavorite;
 use App\MoonShine\Pages\AIMessage\AIMessageIndexPage;
 use App\MoonShine\Pages\AIMessage\AIMessageFormPage;
 use App\MoonShine\Pages\AIMessage\AIMessageDetailPage;
@@ -19,6 +20,7 @@ use MoonShine\Laravel\Pages\Page;
 use MoonShine\Support\ListOf;
 use MoonShine\UI\Fields\Date;
 use MoonShine\UI\Fields\ID;
+use MoonShine\UI\Fields\Switcher;
 use MoonShine\UI\Fields\Text;
 use MoonShine\UI\Fields\Url;
 
@@ -28,6 +30,7 @@ use MoonShine\UI\Fields\Url;
 class AIMessageResource extends ModelResource
 {
     use DoubleRowFields;
+    use ToggleFavorite;
 
     protected string $model = AiMessage::class;
 
@@ -79,6 +82,9 @@ class AIMessageResource extends ModelResource
             Date::make('Создано', 'created_at')
                 ->format('d.m.Y H:i:s')
                 ->sortable(),
+
+            $this->switcherFavorite('purchase'),
+
             /*Date::make('Изменено', 'updated_at')
                 ->format('d.m.Y H:i:s'),*/
             Text::make('Описание', 'object_info')
