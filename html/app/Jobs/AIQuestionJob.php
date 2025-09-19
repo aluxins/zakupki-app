@@ -80,18 +80,22 @@ class AIQuestionJob implements ShouldQueue
             json_encode($response)
         );
 
-        if (!empty($response['data']['choices'][0]['message']['content'])) {
-            $result = $response['data']['choices'][0]['message']['content'];
-            preg_match('/[0-9-]{4}-[0-9-]{2}-[0-9-]{2}/', $result, $matches);
-            if (isset($matches[0])) {
-                $purchase->delivered_at = $matches[0];
-                $purchase->save();
-                Log::info(
-                    'AI Question Job success',
-                    ['purchase_number' => $purchase->purchase_number, 'delivered_at' => $purchase->delivered_at]
-                );
-                return;
-            }
+        // Ответ ИИ в приоритете берется из content. Если там даты нет, то ищем в reasoning.
+        // В ответах может содержаться более одной даты. Определяется максимальная, так как, вероятно, является искомой.
+        $message_content = $response['data']['choices'][0]['message']['content'] ?? '';
+        $message_reasoning = $response['data']['choices'][0]['message']['reasoning'] ?? '';
+        preg_match_all('/[0-9-]{4}-[0-9-]{2}-[0-9-]{2}/', $message_content, $matches_content);
+        preg_match_all('/[0-9-]{4}-[0-9-]{2}-[0-9-]{2}/', $message_reasoning, $matches_reasoning);
+        $result = count($matches_content[0]) ? $matches_content[0] : $matches_reasoning[0];
+
+        if (count($result) and $delivered_at = max($result)) {
+            $purchase->delivered_at = $delivered_at;
+            $purchase->save();
+            Log::info(
+                'AI Question Job success',
+                ['purchase_number' => $purchase->purchase_number, 'delivered_at' => $purchase->delivered_at]
+            );
+            return;
         }
         Log::error('AI Question Job failed', ['purchase_number' => $purchase->purchase_number]);
     }
