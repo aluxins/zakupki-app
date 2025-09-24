@@ -129,12 +129,12 @@ trait ToggleFavorite
      * Получение статуса избранного через полиморфное отношение модели или через фасад сервиса.
      *
      * @param $model
-     * @param int $folderId
+     * @param ?int $folderId
      * @param string $folderName
      * @param bool $personal
      * @return int
      */
-    private function getSetValue($model, int $folderId, string $folderName, bool $personal): int
+    private function getSetValue($model, ?int $folderId, string $folderName, bool $personal): int
     {
         if (method_exists($model, 'favorite')) {
             return $model->favorite($folderId)->first() ? 1 : 0;
@@ -153,9 +153,9 @@ trait ToggleFavorite
      *
      * @param string $folderName
      * @param bool $personal
-     * @return int
+     * @return ?int
      */
-    private function getFolderId(string $folderName, bool $personal): int
+    private function getFolderId(string $folderName, bool $personal): ?int
     {
         $key = "{$folderName}_{$personal}_" . Auth::id();
         if(!array_key_exists($key, $this->foldersFavorite)) {

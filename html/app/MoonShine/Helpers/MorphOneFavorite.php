@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 trait MorphOneFavorite
 {
-    public function favorite($folderId): MorphOne
+    public function favorite(?int $folderId): MorphOne
     {
         return $this->morphOne(Favorite::class, 'favoritable')
             ->forOwner(auth()->id())->forFolder($folderId);
