@@ -2,7 +2,6 @@
 
 namespace App\Http\Services\Favorites;
 
-use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
@@ -45,8 +44,8 @@ class FavoriteService
 
             return Favorite::create([
                 'moonshine_users_id' => $ownerId,
-                'model_name' => $model::class,
-                'model_id' => $model->getKey(),
+                'favoritable_id' => $model->getKey(),
+                'favoritable_type' => $model::class,
                 'favorite_folder_id' => $folderId,
             ]);
         });

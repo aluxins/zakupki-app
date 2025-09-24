@@ -10,8 +10,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 /**
  * @property int $id
  * @property int $moonshine_users_id
- * @property string $model_name
- * @property int $model_id
+ * @property int $favoritable_id
+ * @property string $favoritable_type
  * @property int $favorite_folder_id
  * @method static forOwner(int $ownerId)
  * @method static findOrFail(string $favoriteId)
@@ -22,15 +22,15 @@ class Favorite extends Model
 
     protected $fillable = [
         'moonshine_users_id',
-        'model_name',
-        'model_id',
+        'favoritable_id',
+        'favoritable_type',
         'favorite_folder_id',
     ];
 
-/*    public function favoritable(): MorphTo
+    public function favoritable(): MorphTo
     {
         return $this->morphTo();
-    }*/
+    }
 
     public function folder(): BelongsTo
     {
@@ -52,8 +52,8 @@ class Favorite extends Model
 
     public function scopeForModel(Builder $query, Model $model): Builder
     {
-        return $query->where('model_name', $model::class)
-            ->where('model_id', $model->getKey());
+        return $query->where('favoritable_type', $model::class)
+            ->where('favoritable_id', $model->getKey());
     }
 
     public function scopeForFolder(Builder $query, ?int $folderId): Builder

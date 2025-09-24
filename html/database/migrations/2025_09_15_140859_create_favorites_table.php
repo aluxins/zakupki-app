@@ -13,15 +13,15 @@ return new class extends Migration {
                 ->constrained()
                 ->cascadeOnDelete()
                 ->cascadeOnUpdate();
-            $table->string('model_name');
-            $table->bigInteger('model_id');
+            $table->bigInteger('favoritable_id');
+            $table->string('favoritable_type');
             $table->foreignIdFor(FavoriteFolder::class)->nullable()->index()
                 ->constrained()
                 ->cascadeOnDelete()
                 ->cascadeOnUpdate();
             $table->timestamps();
 
-            $table->unique(['moonshine_users_id', 'model_name', 'model_id', 'favorite_folder_id'], 'favorites_unique');
+            $table->unique(['moonshine_users_id', 'favoritable_type', 'favoritable_id', 'favorite_folder_id'], 'favorites_unique');
         });
     }
 

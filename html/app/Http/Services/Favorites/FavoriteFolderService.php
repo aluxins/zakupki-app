@@ -95,4 +95,16 @@ class FavoriteFolderService
     {
         return FavoriteFolder::forOwner($ownerId)->orderBy($orderBy)->get();
     }
+
+    /**
+     * Получить папку по названию.
+     *
+     * @param string $folderName
+     * @param int|null $ownerId
+     * @return FavoriteFolder|null
+     */
+    public function getFolderForName(string $folderName, ?int $ownerId = null): FavoriteFolder|null
+    {
+        return FavoriteFolder::forOwner($ownerId)->forName($folderName)->first();
+    }
 }

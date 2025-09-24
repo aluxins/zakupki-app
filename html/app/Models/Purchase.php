@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\MoonShine\Helpers\MorphOneFavorite;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -30,6 +31,8 @@ use Throwable;
  */
 class Purchase extends Model
 {
+    use MorphOneFavorite;
+
     protected $table = 'purchases';
 
     /**

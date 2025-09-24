@@ -27,4 +27,5 @@ interface FavoritesInterface
     public function updateFolderName(int $ownerId, FavoriteFolder|string $folder, string $newName): FavoriteFolder;
     public function deleteFolder(int $ownerId, int $folderId): bool;
     public function getAllFoldersForOwner(?int $ownerId = null, string $orderBy = 'name'): Collection;
+    public function getFolderForName(string $folderName, ?int $ownerId = null): FavoriteFolder|null;
 }

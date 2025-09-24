@@ -27,4 +27,9 @@ class FavoriteFolder extends Model
     {
         return $query->where('moonshine_users_id', $ownerId);
     }
+
+    public function scopeForName(Builder $query, string $folderName): Builder
+    {
+        return $query->where('name', $folderName);
+    }
 }

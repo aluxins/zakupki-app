@@ -6,6 +6,7 @@ use App\Models\Favorite;
 use App\Models\FavoriteFolder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Unified service for managing favorites and favorite folders.
@@ -50,6 +51,9 @@ class FavoritesService
         return $this->folderService->createOrFindFolder($ownerId, $name, $personal);
     }
 
+    /**
+     * @throws ValidationException
+     */
     public function updateFolderName(int $ownerId, FavoriteFolder|string $folder, string $newName): FavoriteFolder
     {
         return $this->folderService->updateFolderName($ownerId, $folder, $newName);
@@ -63,6 +67,11 @@ class FavoritesService
     public function getAllFoldersForOwner(?int $ownerId = null, string $orderBy = 'name'): Collection
     {
         return $this->folderService->getAllFoldersForOwner($ownerId, $orderBy);
+    }
+
+    public function getFolderForName(string $folderName, ?int $ownerId = null): FavoriteFolder|null
+    {
+        return $this->folderService->getFolderForName($folderName, $ownerId);
     }
 
     // Additional convenience methods
@@ -99,7 +108,7 @@ class FavoritesService
     public function getFavoritesByModel(int $ownerId, string $modelClass): Collection
     {
         return Favorite::forOwner($ownerId)
-            ->where('model_name', $modelClass)
+            ->where('favoritable_type', $modelClass)
             ->get();
     }
 

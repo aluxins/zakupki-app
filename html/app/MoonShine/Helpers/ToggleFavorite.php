@@ -47,6 +47,7 @@ use MoonShine\UI\Fields\Switcher;
  */
 trait ToggleFavorite
 {
+    private array $foldersFavorite = [];
     /**
      * Асинхронное переключение статуса избранного для модели.
      *
@@ -105,29 +106,63 @@ trait ToggleFavorite
         ?string $folderName = null,
         bool $personal = false
     ): Switcher {
-        return Switcher::make('Избранное', 'favorite')
+        return Switcher::make('Избранное')
             ->changePreview(function ($value, Switcher $context) use ($modelName, $folderName, $personal) {
                 $model = $this->getModelForSwitcher($context, $modelName);
 
                 if (!$model) {
-                    return Switcher::make($value)->setValue(0);
+                    return Switcher::make()->setValue(0);
                 }
 
                 $actualFolderName = $folderName ?? $model->getTable();
+                $folderId = $this->getFolderId($actualFolderName, $personal);
 
-                return Switcher::make($value)
-                    ->setValue(
-                        (int)FavoritesFacade::isFavorite(
-                            Auth::id(),
-                            $model,
-                            $actualFolderName,
-                            $personal
-                        )
-                    )
+                return Switcher::make()
+                    ->setValue($this->getSetValue($model, $folderId, $actualFolderName, $personal))
                     ->updateOnPreview(
                         fn() => $this->buildToggleEndpoint($model, $actualFolderName, $personal)
                     );
             });
+    }
+
+    /**
+     * Получение статуса избранного через полиморфное отношение модели или через фасад сервиса.
+     *
+     * @param $model
+     * @param int $folderId
+     * @param string $folderName
+     * @param bool $personal
+     * @return int
+     */
+    private function getSetValue($model, int $folderId, string $folderName, bool $personal): int
+    {
+        if (method_exists($model, 'favorite')) {
+            return $model->favorite($folderId)->first() ? 1 : 0;
+        } else {
+            return (int)FavoritesFacade::isFavorite(
+                Auth::id(),
+                $model,
+                $folderName,
+                $personal
+            );
+        }
+    }
+
+    /**
+     * Получение ID папки.
+     *
+     * @param string $folderName
+     * @param bool $personal
+     * @return int
+     */
+    private function getFolderId(string $folderName, bool $personal): int
+    {
+        $key = "{$folderName}_{$personal}_" . Auth::id();
+        if(!array_key_exists($key, $this->foldersFavorite)) {
+            $folder = FavoritesFacade::getFolderForName($folderName, $personal ? Auth::id() : null);
+            $this->foldersFavorite[$key] = $folder->id ?? null;
+        }
+        return $this->foldersFavorite[$key];
     }
 
     /**
