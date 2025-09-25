@@ -18,7 +18,7 @@ final readonly class PurchasesDTO
         private string $type_fz,
         private string $placing_way,
         private string $published_at,
-        private string $finished_at,
+        private ?string $finished_at,
         private string $classifier,
         private string $url,
         private string $registry_url
@@ -56,7 +56,7 @@ final readonly class PurchasesDTO
             type_fz: $type_fz,
             placing_way: (string) ($data->placingWay ?? ''),
             published_at: (string) ($data->published_at ?? null),
-            finished_at: (string) ($data->collecting_finished_at ?? $data->submission_close_at ?? null),
+            finished_at: ($data->collecting_finished_at ?? $data->submission_close_at ?? null),
             classifier: $classifier,
             url: (string) ($data->url ?? ''),
             registry_url: (string) ($data->registry_url ?? ''),
